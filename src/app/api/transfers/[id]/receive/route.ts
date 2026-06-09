@@ -6,7 +6,7 @@ import { apiOk, apiError } from '@/lib/types';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const tenantId = requireTenant(req);
+    const tenantId = await requireTenant(req);
     const { id } = await params;
     const body = await req.json();
     if (!body.received_qty || body.packaging_ok === undefined || !body.condition) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return apiOk(transfer);
   } catch (e: unknown) {
     const err = e as Error;
-    if (err.message === 'ERR_NO_TENANT') return apiError('x-tenant-id header requis', 401);
+    if (err.message === 'ERR_UNAUTHENTICATED') return apiError('x-tenant-id header requis', 401);
     if (err.message === 'ERR_ALREADY_CONFIRMED') return apiError('Déjà confirmé', 409);
     if (err.message === 'ERR_TRANSFER_NOT_FOUND') return apiError('Transfert introuvable', 404);
     return apiError('Erreur serveur', 500);

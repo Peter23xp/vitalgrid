@@ -1,11 +1,14 @@
 import { NextRequest } from 'next/server';
+import { getSession } from '@/lib/auth';
 
-export function getTenantId(req: NextRequest): string | null {
-  return req.headers.get('x-tenant-id');
+export async function requireTenant(req: NextRequest): Promise<string> {
+  const session = await getSession(req);
+  if (!session) throw new Error('ERR_UNAUTHENTICATED');
+  return session.tenantId as string;
 }
 
-export function requireTenant(req: NextRequest): string {
-  const id = getTenantId(req);
-  if (!id) throw new Error('ERR_NO_TENANT');
-  return id;
+export async function requireSession(req: NextRequest) {
+  const session = await getSession(req);
+  if (!session) throw new Error('ERR_UNAUTHENTICATED');
+  return session;
 }

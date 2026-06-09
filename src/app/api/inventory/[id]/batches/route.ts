@@ -5,20 +5,20 @@ import { apiOk, apiError } from '@/lib/types';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const tenantId = requireTenant(req);
+    const tenantId = await requireTenant(req);
     const { id } = await params;
     const batches = await getBatchesForResource(tenantId, id);
     return apiOk(batches);
   } catch (e: unknown) {
     const err = e as Error;
-    if (err.message === 'ERR_NO_TENANT') return apiError('x-tenant-id header requis', 401);
+    if (err.message === 'ERR_UNAUTHENTICATED') return apiError('x-tenant-id header requis', 401);
     return apiError('Erreur serveur', 500);
   }
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const tenantId = requireTenant(req);
+    const tenantId = await requireTenant(req);
     const { id } = await params;
     const body = await req.json();
     if (!body.batch_number || !body.quantity || !body.expiry_date) {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return apiOk(batch, 201);
   } catch (e: unknown) {
     const err = e as Error;
-    if (err.message === 'ERR_NO_TENANT') return apiError('x-tenant-id header requis', 401);
+    if (err.message === 'ERR_UNAUTHENTICATED') return apiError('x-tenant-id header requis', 401);
     return apiError('Erreur serveur', 500);
   }
 }

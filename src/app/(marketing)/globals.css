@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --mk-navy:      #0F172A;
+  --mk-navy-90:   #1E293B;
+  --mk-navy-80:   #334155;
+  --mk-sage:      #059669;
+  --mk-sage-light:#D1FAE5;
+  --mk-white:     #FFFFFF;
+  --mk-off-white: #F8FAFC;
+  --mk-slate:     #64748B;
+  --mk-border:    rgba(255,255,255,0.1);
+
+  --mk-font-display: 'Sora', sans-serif;
+  --mk-font-body:    'Noto Sans', sans-serif;
+  --mk-font-mono:    'Fira Code', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--mk-font-body);
+  background: var(--mk-white);
+  color: var(--mk-navy);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: var(--mk-font-body); border: none; background: none; }
+
+.mk-btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--mk-sage); color: var(--mk-white);
+  padding: 12px 28px; border-radius: 8px;
+  font-family: var(--mk-font-display); font-weight: 600; font-size: 15px;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.mk-btn-primary:hover { background: #047857; transform: translateY(-1px); }
+
+.mk-btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--mk-white);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 11px 24px; border-radius: 8px;
+  font-family: var(--mk-font-display); font-weight: 500; font-size: 15px;
+  transition: border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+.mk-btn-outline:hover { border-color: var(--mk-white); background: rgba(255,255,255,0.08); }
+
+.mk-btn-outline-dark {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--mk-navy);
+  border: 1px solid var(--mk-navy-80);
+  padding: 11px 24px; border-radius: 8px;
+  font-family: var(--mk-font-display); font-weight: 500; font-size: 15px;
+  transition: border-color 0.2s;
+}
+.mk-btn-outline-dark:hover { border-color: var(--mk-navy); }
+
+.mk-section { padding: 96px 0; }
+.mk-section-dark { background: var(--mk-navy); color: var(--mk-white); }
+.mk-container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+.mk-label {
+  display: inline-block;
+  font-family: var(--mk-font-mono); font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--mk-sage); margin-bottom: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

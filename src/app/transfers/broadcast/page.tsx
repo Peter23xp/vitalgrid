@@ -1,9 +1,47 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { AlertTriangle, Megaphone } from 'lucide-react';
+import { apiFetch } from '@/lib/api-client';
 import styles from './page.module.css';
 
 export default function BroadcastPage() {
+  const router = useRouter();
+
+  const [resourceType, setResourceType] = useState('');
+  const [facilityId, setFacilityId]     = useState('');
+  const [minQty, setMinQty]             = useState('');
+  const [region, setRegion]             = useState('');
+  const [delay, setDelay]               = useState('');
+  const [message, setMessage]           = useState('');
+  const [submitting, setSubmitting]     = useState(false);
+  const [error, setError]               = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
+    try {
+      await apiFetch('/api/broadcasts', {
+        method: 'POST',
+        body: JSON.stringify({
+          resourceType,
+          facilityId,
+          minQty: Number(minQty),
+          region,
+          delay,
+          message,
+        }),
+      });
+      router.push('/transfers');
+    } catch (e: unknown) {
+      setError((e as Error).message);
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className={`animate-fade-in ${styles.container}`}>
       <header className={styles.header}>
@@ -18,12 +56,24 @@ export default function BroadcastPage() {
         Cet appel sera envoyé à TOUS les établissements de la région sélectionnée
       </div>
 
-      <form className={styles.formCard}>
+      {error && (
+        <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid var(--status-error)', borderRadius: 8, padding: '10px 14px', marginBottom: 12, color: 'var(--status-error)', fontSize: 13 }}>
+          {error}
+        </div>
+      )}
+
+      <form className={styles.formCard} onSubmit={handleSubmit}>
         <div className={styles.formGrid}>
 
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="resource">Ressource en pénurie *</label>
-            <select id="resource" className={`input-field ${styles.select}`} required>
+            <select
+              id="resource"
+              className={`input-field ${styles.select}`}
+              required
+              value={resourceType}
+              onChange={(e) => setResourceType(e.target.value)}
+            >
               <option value="">Sélectionner...</option>
               <option value="sang-o-">Sang O-</option>
               <option value="quinine">Quinine inj.</option>
@@ -34,7 +84,13 @@ export default function BroadcastPage() {
 
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="facility">Établissement demandeur *</label>
-            <select id="facility" className={`input-field ${styles.select}`} required>
+            <select
+              id="facility"
+              className={`input-field ${styles.select}`}
+              required
+              value={facilityId}
+              onChange={(e) => setFacilityId(e.target.value)}
+            >
               <option value="">Sélectionner un établissement...</option>
             </select>
           </div>
@@ -48,19 +104,33 @@ export default function BroadcastPage() {
               min="1"
               placeholder="Ex: 10"
               required
+              value={minQty}
+              onChange={(e) => setMinQty(e.target.value)}
             />
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="region">Région de diffusion *</label>
-            <select id="region" className={`input-field ${styles.select}`} required>
+            <select
+              id="region"
+              className={`input-field ${styles.select}`}
+              required
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+            >
               <option value="">Sélectionner une région...</option>
             </select>
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="delay">Délai de réponse souhaité *</label>
-            <select id="delay" className={`input-field ${styles.select}`} required>
+            <select
+              id="delay"
+              className={`input-field ${styles.select}`}
+              required
+              value={delay}
+              onChange={(e) => setDelay(e.target.value)}
+            >
               <option value="">Sélectionner...</option>
               <option value="1h">1 heure</option>
               <option value="2h">2 heures</option>
@@ -76,6 +146,8 @@ export default function BroadcastPage() {
               className={`input-field ${styles.textarea}`}
               rows={4}
               placeholder="Décrivez la situation d'urgence..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
             ></textarea>
           </div>
 
@@ -111,8 +183,9 @@ export default function BroadcastPage() {
           <button
             type="submit"
             className={`btn-primary ${styles.btnBroadcast}`}
+            disabled={submitting}
           >
-            <Megaphone size={15} style={{ marginRight: 6 }} /> ENVOYER LE BROADCAST
+            <Megaphone size={15} style={{ marginRight: 6 }} /> {submitting ? 'Envoi...' : 'ENVOYER LE BROADCAST'}
           </button>
         </div>
       </form>

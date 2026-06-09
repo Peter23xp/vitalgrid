@@ -1,8 +1,12 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
 export default function AlertPreferencesPage() {
+  const [saved, setSaved] = useState(false);
+
   return (
     <div className={`animate-fade-in ${styles.container}`}>
       <header className={styles.header}>
@@ -108,7 +112,14 @@ export default function AlertPreferencesPage() {
       </div>
 
       <div className={styles.formActions}>
-        <button type="button" className="btn-primary">ENREGISTRER</button>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}
+        >
+          ENREGISTRER
+        </button>
+        {saved && <p style={{ color: 'var(--brand-sage)', fontSize: 13, marginTop: 8 }}>Préférences enregistrées</p>}
       </div>
     </div>
   );

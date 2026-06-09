@@ -2,7 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import type { Role } from '@/lib/types';
 
-const PUBLIC_PATHS = ['/login', '/forgot-password', '/api/auth', '/onboarding'];
+// Routes publiques — pas de JWT requis, accessible sans connexion
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/forgot-password',
+  '/onboarding',
+  '/demo',
+  '/register',
+  '/api/auth',
+  '/api/demo-request',
+  '/api/access-requests',
+];
+
+// Routes protégées — JWT obligatoire. Tout le reste est public.
+const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/inventory',
+  '/transfers',
+  '/alerts',
+  '/analytics',
+  '/facilities',
+  '/admin',
+  '/settings',
+];
 
 const ROLE_ROUTES: Array<{ pattern: RegExp; roles: Role[] }> = [
   { pattern: /^\/dashboard\/admin/, roles: ['super_admin'] },
@@ -26,14 +49,33 @@ const ROLE_DASHBOARDS: Record<Role, string> = {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
-  }
-
+  // Fichiers statiques — laisser passer sans traitement
   if (pathname.startsWith('/_next') || pathname.includes('.')) {
     return NextResponse.next();
   }
 
+  // Routes publiques — laisser passer sans JWT
+  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
+    // Si l'utilisateur est connecté et arrive sur / ou /login → redirect dashboard
+    const token = req.cookies.get('vg_access')?.value;
+    if (token && (pathname === '/' || pathname === '/login')) {
+      const session = await verifyToken(token);
+      if (session) {
+        const url = req.nextUrl.clone();
+        url.pathname = ROLE_DASHBOARDS[session.role as Role] ?? '/dashboard';
+        return NextResponse.redirect(url);
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // Routes non protégées (ex: /contact, /legal/*) — laisser passer
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+  if (!isProtected) {
+    return NextResponse.next();
+  }
+
+  // À partir d'ici : route protégée — JWT obligatoire
   const token = req.cookies.get('vg_access')?.value;
 
   if (!token) {
@@ -78,12 +120,6 @@ export async function middleware(req: NextRequest) {
       url.searchParams.delete('next');
       return NextResponse.redirect(url);
     }
-  }
-
-  if (pathname === '/login' || pathname === '/') {
-    const url = req.nextUrl.clone();
-    url.pathname = ROLE_DASHBOARDS[session.role as Role] ?? '/dashboard';
-    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

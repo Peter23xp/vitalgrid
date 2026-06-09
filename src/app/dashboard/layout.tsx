@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Menu, Bell, User,
+  Menu, Bell, User, LogOut,
   LayoutDashboard, Briefcase, Globe2, ShieldCheck,
   Package, AlertTriangle, Clock, Upload, Tag,
   ArrowLeftRight, Plus, History, Megaphone,
@@ -206,7 +206,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 }
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const profileHref = user?.role === 'super_admin'
     ? '/admin/organization'
@@ -240,9 +240,30 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
           <Link href="/alerts" className={styles.notificationBtn} aria-label="Alertes">
             <Bell size={18} />
           </Link>
-          <Link href={profileHref} className={styles.userProfile} aria-label="Profil">
-            <User size={16} />
-          </Link>
+          {user && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Link href={profileHref} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 6, textDecoration: 'none', background: 'rgba(15,23,42,0.04)', border: '1px solid var(--border-light)', transition: 'background 0.15s' }}
+                onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(15,23,42,0.08)')}
+                onMouseOut={(e)  => (e.currentTarget.style.background = 'rgba(15,23,42,0.04)')}>
+                <div className={styles.userProfile} style={{ width: 24, height: 24, fontSize: 11 }}>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--brand-navy)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user.name}
+                </span>
+              </Link>
+              <button
+                onClick={logout}
+                aria-label="Se déconnecter"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 6, color: 'var(--brand-slate)', transition: 'background 0.15s, color 0.15s', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = 'var(--status-error)'; }}
+                onMouseOut={(e)  => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--brand-slate)'; }}
+                title="Se déconnecter"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

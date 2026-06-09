@@ -34,7 +34,7 @@ interface Transfer {
 }
 
 export default function FacilityManagerDashboard() {
-  const facilityId = process.env.NEXT_PUBLIC_FACILITY_ID ?? '';
+  const [facilityId, setFacilityId] = useState('');
   const [summary, setSummary] = useState<Summary | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -43,6 +43,13 @@ export default function FacilityManagerDashboard() {
   const currentDate = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
   });
+
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((u) => { if (u.facilityId) setFacilityId(u.facilityId); })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!facilityId || facilityId === '00000000-0000-0000-0000-000000000001') {

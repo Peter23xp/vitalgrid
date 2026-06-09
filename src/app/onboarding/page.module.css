@@ -1,0 +1,182 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background-color: var(--bg-main);
+}
+
+.card {
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--bg-card);
+  border: none;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.stepperNav {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3rem;
+  padding: 0 2rem;
+}
+
+.stepperLine {
+  position: absolute;
+  top: 10px;
+  left: 3rem;
+  right: 3rem;
+  height: 2px;
+  background-color: var(--border-light);
+  z-index: 1;
+}
+
+.stepDot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 2;
+  color: var(--border-light);
+  background: var(--bg-card);
+  padding: 0 0.5rem;
+}
+
+.stepDot span:first-child {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.stepDotActive {
+  color: var(--brand-primary);
+}
+
+.stepLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.stepDotActive .stepLabel {
+  color: var(--brand-primary);
+}
+
+.stepContent {
+  margin-bottom: 2rem;
+}
+
+.stepTitle {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: none; /* simple arrow could go here */
+}
+
+.addRegionBtn {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  color: var(--brand-primary);
+  font-weight: 500;
+  background: #FAFAFA;
+  transition: all 0.2s ease;
+}
+
+.addRegionBtn:hover {
+  background: #F3F4F6;
+  border-color: var(--brand-primary);
+}
+
+.uploadBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  background: #FAFAFA;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadBox:hover {
+  border-color: var(--brand-primary);
+  background: rgba(29, 158, 117, 0.05);
+}
+
+.uploadIcon {
+  font-size: 18px;
+}
+
+.uploadMeta {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.skipLink {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.skipLink:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.continueBtn {
+  min-width: 150px;
+}

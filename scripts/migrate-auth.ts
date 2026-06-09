@@ -18,7 +18,8 @@ async function run() {
 
   const migrations = [
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(100)`,
-    `ALTER TABLE users ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER`,
+    `UPDATE users SET failed_login_attempts = 0 WHERE failed_login_attempts IS NULL`,
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMPTZ`,
   ];
 

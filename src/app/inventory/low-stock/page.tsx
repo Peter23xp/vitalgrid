@@ -11,9 +11,16 @@ interface Resource {
 }
 
 export default function LowStockPage() {
-  const facilityId = process.env.NEXT_PUBLIC_FACILITY_ID ?? '';
+  const [facilityId, setFacilityId] = useState('');
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((u) => { if (u.facilityId) setFacilityId(u.facilityId); })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!facilityId || facilityId === '00000000-0000-0000-0000-000000000001') { setLoading(false); return; }

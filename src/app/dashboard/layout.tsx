@@ -103,7 +103,6 @@ function getNavGroups(role: Role): NavGroup[] {
       { href: '/admin/users',         label: 'Utilisateurs',  icon: <Users size={15} /> },
       { href: '/admin/organizations', label: 'Organisations', icon: <Building2 size={15} /> },
       { href: '/admin/roles',         label: 'Rôles',         icon: <Lock size={15} /> },
-      { href: '/admin/organization',  label: 'Organisation',  icon: <Settings size={15} /> },
       { href: '/admin/api-keys',      label: 'Clés API',      icon: <KeyRound size={15} /> },
       { href: '/admin/audit-log',     label: 'Journal audit', icon: <ScrollText size={15} /> },
       { href: '/admin/billing',       label: 'Facturation',   icon: <CreditCard size={15} /> },
@@ -114,7 +113,7 @@ function getNavGroups(role: Role): NavGroup[] {
   const orgSettings: NavGroup = {
     title: 'Paramètres',
     items: [
-      { href: '/admin/organization', label: 'Mon organisation', icon: <Settings size={15} /> },
+      { href: '/settings/organization', label: 'Mon organisation', icon: <Settings size={15} /> },
     ],
   };
 
@@ -209,8 +208,8 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
 
   const profileHref = user?.role === 'super_admin'
-    ? '/admin/organization'
-    : '/admin/organization';
+    ? '/dashboard/admin'
+    : '/settings/organization';
 
   return (
     <div className={styles.dashboardContainer}>

@@ -8,6 +8,7 @@ const ROLE_ROUTES: Array<{ pattern: RegExp; roles: Role[] }> = [
   { pattern: /^\/dashboard\/admin/, roles: ['super_admin'] },
   { pattern: /^\/admin\/organizations/, roles: ['super_admin'] },
   { pattern: /^\/admin/,            roles: ['super_admin'] },
+  { pattern: /^\/settings/,         roles: ['facility_manager', 'ngo_coordinator', 'auditor', 'super_admin'] },
   { pattern: /^\/dashboard\/ngo/,   roles: ['ngo_coordinator', 'super_admin'] },
   { pattern: /^\/dashboard\/field/, roles: ['field_agent', 'super_admin'] },
   { pattern: /^\/analytics/,        roles: ['facility_manager', 'ngo_coordinator', 'auditor', 'super_admin'] },

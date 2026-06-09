@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import type { Role } from '@/lib/types';
 
-const PUBLIC_PATHS = ['/login', '/forgot-password', '/api/auth'];
+const PUBLIC_PATHS = ['/login', '/forgot-password', '/api/auth', '/onboarding'];
 
 const ROLE_ROUTES: Array<{ pattern: RegExp; roles: Role[] }> = [
   { pattern: /^\/dashboard\/admin/, roles: ['super_admin'] },
+  { pattern: /^\/admin\/organizations/, roles: ['super_admin'] },
   { pattern: /^\/admin/,            roles: ['super_admin'] },
   { pattern: /^\/dashboard\/ngo/,   roles: ['ngo_coordinator', 'super_admin'] },
   { pattern: /^\/dashboard\/field/, roles: ['field_agent', 'super_admin'] },
@@ -54,6 +55,18 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Onboarding — facility_manager sans facilityId doit compléter l'onboarding
+  if (
+    session.role === 'facility_manager' &&
+    !session.facilityId &&
+    pathname !== '/onboarding' &&
+    !pathname.startsWith('/api/')
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/onboarding';
     return NextResponse.redirect(url);
   }
 

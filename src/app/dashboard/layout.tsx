@@ -91,6 +91,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className={styles.navGroup}>
               <span className={styles.sectionHeader}>Administration</span>
               <Link href="/admin/users" className={styles.navLink}><Users size={15} />Utilisateurs</Link>
+              <Link href="/admin/organizations" className={styles.navLink}><Building2 size={15} />Organisations</Link>
               <Link href="/admin/roles" className={styles.navLink}><Lock size={15} />Rôles</Link>
               <Link href="/admin/organization" className={styles.navLink}><Settings size={15} />Organisation</Link>
               <Link href="/admin/api-keys" className={styles.navLink}><KeyRound size={15} />Clés API</Link>

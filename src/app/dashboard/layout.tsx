@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import {
@@ -10,10 +12,206 @@ import {
   Building2, MapPin,
   Users, Lock, Settings, KeyRound, ScrollText, CreditCard, Activity
 } from 'lucide-react';
+import { AuthProvider, useAuth } from '@/contexts/auth';
+import type { Role } from '@/lib/types';
 import styles from './layout.module.css';
-import { AuthProvider } from '@/contexts/auth';
+
+// ─── Navigation par rôle ─────────────────────────────────────
+
+type NavItem = { href: string; label: string; icon: React.ReactNode };
+type NavGroup = { title: string; items: NavItem[] };
+
+function getNavGroups(role: Role): NavGroup[] {
+  const dashboard: NavGroup = {
+    title: 'Tableau de bord',
+    items: [
+      { href: '/dashboard',       label: 'Vue d\'ensemble',  icon: <LayoutDashboard size={15} /> },
+    ],
+  };
+
+  const inventory: NavGroup = {
+    title: 'Inventaire',
+    items: [
+      { href: '/inventory',           label: 'Ressources',    icon: <Package size={15} /> },
+      { href: '/inventory/low-stock', label: 'Stock bas',     icon: <AlertTriangle size={15} /> },
+      { href: '/inventory/expiry',    label: 'Expirations',   icon: <Clock size={15} /> },
+      { href: '/inventory/new',       label: 'Ajouter',       icon: <Plus size={15} /> },
+    ],
+  };
+
+  const inventoryFM: NavGroup = {
+    title: 'Inventaire',
+    items: [
+      { href: '/inventory',           label: 'Ressources',    icon: <Package size={15} /> },
+      { href: '/inventory/low-stock', label: 'Stock bas',     icon: <AlertTriangle size={15} /> },
+      { href: '/inventory/expiry',    label: 'Expirations',   icon: <Clock size={15} /> },
+      { href: '/inventory/new',       label: 'Ajouter',       icon: <Plus size={15} /> },
+      { href: '/inventory/import',    label: 'Importer CSV',  icon: <Upload size={15} /> },
+      { href: '/inventory/categories',label: 'Catégories',    icon: <Tag size={15} /> },
+    ],
+  };
+
+  const transfers: NavGroup = {
+    title: 'Transferts',
+    items: [
+      { href: '/transfers',     label: 'Mes transferts',  icon: <ArrowLeftRight size={15} /> },
+      { href: '/transfers/new', label: 'Nouvelle demande', icon: <Plus size={15} /> },
+    ],
+  };
+
+  const transfersFM: NavGroup = {
+    title: 'Transferts',
+    items: [
+      { href: '/transfers',         label: 'Transferts',       icon: <ArrowLeftRight size={15} /> },
+      { href: '/transfers/new',     label: 'Nouvelle demande', icon: <Plus size={15} /> },
+      { href: '/transfers/history', label: 'Historique',       icon: <History size={15} /> },
+      { href: '/transfers/broadcast', label: 'Diffusion urgence', icon: <Megaphone size={15} /> },
+    ],
+  };
+
+  const alerts: NavGroup = {
+    title: 'Alertes',
+    items: [
+      { href: '/alerts',            label: 'Centre alertes',   icon: <BellRing size={15} /> },
+      { href: '/alerts/cold-chain', label: 'Chaîne du froid',  icon: <Thermometer size={15} /> },
+      { href: '/alerts/history',    label: 'Historique',       icon: <ClipboardList size={15} /> },
+    ],
+  };
+
+  const analytics: NavGroup = {
+    title: 'Analytics',
+    items: [
+      { href: '/analytics/map',         label: 'Carte régionale',    icon: <Map size={15} /> },
+      { href: '/analytics/forecast',    label: 'Prévisions',         icon: <TrendingUp size={15} /> },
+      { href: '/analytics/expiry-risk', label: 'Risques expiration', icon: <FileWarning size={15} /> },
+      { href: '/analytics/transfers',   label: 'Efficacité',         icon: <BarChart2 size={15} /> },
+      { href: '/analytics/export',      label: 'Export & API',       icon: <Download size={15} /> },
+    ],
+  };
+
+  const facilities: NavGroup = {
+    title: 'Établissements',
+    items: [
+      { href: '/facilities',     label: 'Liste',  icon: <Building2 size={15} /> },
+      { href: '/facilities/map', label: 'Carte',  icon: <MapPin size={15} /> },
+    ],
+  };
+
+  const admin: NavGroup = {
+    title: 'Administration',
+    items: [
+      { href: '/admin/users',         label: 'Utilisateurs',  icon: <Users size={15} /> },
+      { href: '/admin/organizations', label: 'Organisations', icon: <Building2 size={15} /> },
+      { href: '/admin/roles',         label: 'Rôles',         icon: <Lock size={15} /> },
+      { href: '/admin/organization',  label: 'Organisation',  icon: <Settings size={15} /> },
+      { href: '/admin/api-keys',      label: 'Clés API',      icon: <KeyRound size={15} /> },
+      { href: '/admin/audit-log',     label: 'Journal audit', icon: <ScrollText size={15} /> },
+      { href: '/admin/billing',       label: 'Facturation',   icon: <CreditCard size={15} /> },
+      { href: '/admin/system-status', label: 'Statut système',icon: <Activity size={15} /> },
+    ],
+  };
+
+  const orgSettings: NavGroup = {
+    title: 'Paramètres',
+    items: [
+      { href: '/admin/organization', label: 'Mon organisation', icon: <Settings size={15} /> },
+    ],
+  };
+
+  switch (role) {
+    case 'super_admin':
+      return [
+        { ...dashboard, items: [{ href: '/dashboard/admin', label: 'Vue globale', icon: <ShieldCheck size={15} /> }] },
+        facilities,
+        admin,
+      ];
+
+    case 'facility_manager':
+      return [
+        { ...dashboard, items: [{ href: '/dashboard', label: 'Vue d\'ensemble', icon: <LayoutDashboard size={15} /> }] },
+        inventoryFM,
+        transfersFM,
+        alerts,
+        analytics,
+        orgSettings,
+      ];
+
+    case 'field_agent':
+      return [
+        { ...dashboard, items: [{ href: '/dashboard/field', label: 'Mon espace', icon: <Briefcase size={15} /> }] },
+        inventory,
+        transfers,
+        { ...alerts, items: alerts.items.slice(0, 1) },
+      ];
+
+    case 'ngo_coordinator':
+      return [
+        { ...dashboard, items: [{ href: '/dashboard/ngo', label: 'Vue régionale', icon: <Globe2 size={15} /> }] },
+        facilities,
+        { ...transfersFM, items: transfersFM.items.filter((i) => i.href !== '/transfers/new') },
+        analytics,
+      ];
+
+    case 'auditor':
+      return [
+        { ...dashboard, items: [{ href: '/analytics/map', label: 'Carte régionale', icon: <Map size={15} /> }] },
+        analytics,
+        { title: 'Audit', items: [{ href: '/admin/audit-log', label: 'Journal d\'audit', icon: <ScrollText size={15} /> }] },
+      ];
+
+    default:
+      return [dashboard];
+  }
+}
+
+// ─── Sidebar client — lit le rôle depuis AuthContext ─────────
+
+function Sidebar() {
+  const { user } = useAuth();
+  const groups = user ? getNavGroups(user.role) : [];
+  const dashboardHref = user ? {
+    super_admin:      '/dashboard/admin',
+    facility_manager: '/dashboard',
+    field_agent:      '/dashboard/field',
+    ngo_coordinator:  '/dashboard/ngo',
+    auditor:          '/analytics/map',
+  }[user.role] ?? '/dashboard' : '/dashboard';
+
+  return (
+    <nav className={styles.sidebar} aria-label="Navigation principale">
+      <div className={styles.sidebarInner}>
+        {groups.map((group) => (
+          <div key={group.title} className={styles.navGroup}>
+            <span className={styles.sectionHeader}>{group.title}</span>
+            {group.items.map((item) => (
+              <Link key={item.href} href={item.href} className={styles.navLink}>
+                {item.icon}{item.label}
+              </Link>
+            ))}
+          </div>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// ─── Layout principal ────────────────────────────────────────
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <DashboardInner>{children}</DashboardInner>
+    </AuthProvider>
+  );
+}
+
+function DashboardInner({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+
+  const profileHref = user?.role === 'super_admin'
+    ? '/admin/organization'
+    : '/admin/organization';
+
   return (
     <div className={styles.dashboardContainer}>
       <header className={styles.navbar}>
@@ -21,93 +219,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button className={styles.menuBtn} aria-label="Menu">
             <Menu size={20} />
           </button>
-          <Link href="/dashboard" className={styles.brand}>
+          <Link href={user ? {
+            super_admin:      '/dashboard/admin',
+            facility_manager: '/dashboard',
+            field_agent:      '/dashboard/field',
+            ngo_coordinator:  '/dashboard/ngo',
+            auditor:          '/analytics/map',
+          }[user.role] ?? '/dashboard' : '/dashboard'} className={styles.brand}>
             <span className={styles.brandAccent}>Vital</span>Grid
           </Link>
           <div className={styles.divider} />
+          {user && (
+            <span className={styles.facilityName} style={{ fontSize: 12, color: 'var(--brand-slate)' }}>
+              {user.name}
+            </span>
+          )}
         </div>
 
         <div className={styles.navRight}>
           <Link href="/alerts" className={styles.notificationBtn} aria-label="Alertes">
             <Bell size={18} />
           </Link>
-          <Link href="/admin/organization" className={styles.userProfile} aria-label="Profil">
+          <Link href={profileHref} className={styles.userProfile} aria-label="Profil">
             <User size={16} />
           </Link>
         </div>
       </header>
 
       <div className={styles.body}>
-        <nav className={styles.sidebar} aria-label="Navigation principale">
-          <div className={styles.sidebarInner}>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Tableau de bord</span>
-              <Link href="/dashboard" className={styles.navLink}><LayoutDashboard size={15} />Vue d&apos;ensemble</Link>
-              <Link href="/dashboard/field" className={styles.navLink}><Briefcase size={15} />Terrain</Link>
-              <Link href="/dashboard/ngo" className={styles.navLink}><Globe2 size={15} />ONG</Link>
-              <Link href="/dashboard/admin" className={styles.navLink}><ShieldCheck size={15} />Super Admin</Link>
-            </div>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Inventaire</span>
-              <Link href="/inventory" className={styles.navLink}><Package size={15} />Ressources</Link>
-              <Link href="/inventory/low-stock" className={styles.navLink}><AlertTriangle size={15} />Stock bas</Link>
-              <Link href="/inventory/expiry" className={styles.navLink}><Clock size={15} />Expirations</Link>
-              <Link href="/inventory/import" className={styles.navLink}><Upload size={15} />Importer</Link>
-              <Link href="/inventory/categories" className={styles.navLink}><Tag size={15} />Catégories</Link>
-            </div>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Transferts</span>
-              <Link href="/transfers" className={styles.navLink}><ArrowLeftRight size={15} />Mes transferts</Link>
-              <Link href="/transfers/new" className={styles.navLink}><Plus size={15} />Nouvelle demande</Link>
-              <Link href="/transfers/history" className={styles.navLink}><History size={15} />Historique</Link>
-              <Link href="/transfers/broadcast" className={styles.navLink}><Megaphone size={15} />Diffusion urgence</Link>
-            </div>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Alertes</span>
-              <Link href="/alerts" className={styles.navLink}><BellRing size={15} />Centre alertes</Link>
-              <Link href="/alerts/cold-chain" className={styles.navLink}><Thermometer size={15} />Chaîne du froid</Link>
-              <Link href="/alerts/history" className={styles.navLink}><ClipboardList size={15} />Historique</Link>
-            </div>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Analytics</span>
-              <Link href="/analytics/map" className={styles.navLink}><Map size={15} />Carte régionale</Link>
-              <Link href="/analytics/forecast" className={styles.navLink}><TrendingUp size={15} />Prévisions</Link>
-              <Link href="/analytics/expiry-risk" className={styles.navLink}><FileWarning size={15} />Risques expiration</Link>
-              <Link href="/analytics/transfers" className={styles.navLink}><BarChart2 size={15} />Efficacité</Link>
-              <Link href="/analytics/export" className={styles.navLink}><Download size={15} />Export & API</Link>
-            </div>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Établissements</span>
-              <Link href="/facilities" className={styles.navLink}><Building2 size={15} />Liste</Link>
-              <Link href="/facilities/map" className={styles.navLink}><MapPin size={15} />Carte</Link>
-            </div>
-
-            <div className={styles.navGroup}>
-              <span className={styles.sectionHeader}>Administration</span>
-              <Link href="/admin/users" className={styles.navLink}><Users size={15} />Utilisateurs</Link>
-              <Link href="/admin/organizations" className={styles.navLink}><Building2 size={15} />Organisations</Link>
-              <Link href="/admin/roles" className={styles.navLink}><Lock size={15} />Rôles</Link>
-              <Link href="/admin/organization" className={styles.navLink}><Settings size={15} />Organisation</Link>
-              <Link href="/admin/api-keys" className={styles.navLink}><KeyRound size={15} />Clés API</Link>
-              <Link href="/admin/audit-log" className={styles.navLink}><ScrollText size={15} />Journal audit</Link>
-              <Link href="/admin/billing" className={styles.navLink}><CreditCard size={15} />Facturation</Link>
-              <Link href="/admin/system-status" className={styles.navLink}><Activity size={15} />Statut système</Link>
-            </div>
-
-          </div>
-        </nav>
-
-        <AuthProvider>
-          <main className={styles.pageContent}>
-            {children}
-          </main>
-        </AuthProvider>
+        <Sidebar />
+        <main className={styles.pageContent}>
+          {children}
+        </main>
       </div>
     </div>
   );

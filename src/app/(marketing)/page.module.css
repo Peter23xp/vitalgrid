@@ -11,7 +11,7 @@
 .heroBg {
   position: absolute;
   inset: 0;
-  background-image: url('https://images.unsplash.com/photo-j53JZ9sa44M?auto=format&fit=crop&w=1800&q=80');
+  background-image: url('/assets/Facility Manager.jpg');
   background-size: cover;
   background-position: center right;
   opacity: 0.14;
@@ -362,7 +362,7 @@
 
 .ctaBg {
   position: absolute; inset: 0;
-  background-image: url('https://images.unsplash.com/photo-ZgLTbwiRYv4?auto=format&fit=crop&w=1800&q=80');
+  background-image: url('/assets/NGO COORDINATOR.jpg');
   background-size: cover; background-position: center;
   opacity: 0.08;
 }

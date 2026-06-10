@@ -6,12 +6,12 @@ import { ArrowRight, Package, Bell, ArrowLeftRight, Thermometer, Map, ScrollText
 import styles from './page.module.css';
 
 const FEATURES = [
-  { photo: 'https://images.unsplash.com/photo-CKzto29PAAY?auto=format&fit=crop&w=800&q=80', icon: <Package size={18} />, title: 'Inventaire temps réel', desc: 'Stock par facility, lots avec dates d\'expiration, seuils d\'alerte. Chaque mouvement tracé instantanément.' },
-  { photo: 'https://images.unsplash.com/photo-sWdaAZ5fXU8?auto=format&fit=crop&w=800&q=80', icon: <ArrowLeftRight size={18} />, title: 'Transferts inter-facilities', desc: 'De la demande à la confirmation de réception — garantie ACID sur chaque transaction de ressource critique.' },
-  { photo: 'https://images.unsplash.com/photo-IKffxRTX7mk?auto=format&fit=crop&w=800&q=80', icon: <Thermometer size={18} />, title: 'Chaîne du froid IoT', desc: 'Capteurs connectés, graphique en continu. Alerte automatique si la plage 2-8°C est dépassée.' },
-  { photo: 'https://images.unsplash.com/photo-BnLOgqFAGCM?auto=format&fit=crop&w=800&q=80', icon: <Bell size={18} />, title: 'Alertes intelligentes', desc: 'Stock bas, expiration proche, anomalie de température. Les alertes critiques remontent en temps réel.' },
-  { photo: 'https://images.unsplash.com/photo-6xuyveoP0Bc?auto=format&fit=crop&w=800&q=80', icon: <Map size={18} />, title: 'Carte régionale des stocks', desc: 'Visualisez les surplus et pénuries par zone. Coordonnez les redistributions avant qu\'il soit trop tard.' },
-  { photo: 'https://images.unsplash.com/photo-Pd4lRfKo16U?auto=format&fit=crop&w=800&q=80', icon: <ScrollText size={18} />, title: 'Audit trail immuable', desc: 'Chaque action tracée en base append-only. Conformité OMS, UNICEF, bailleurs de fonds internationaux.' },
+  { photo: '/assets/INVENTAIRE TEMPS RÉEL.jpg',         icon: <Package size={18} />,        title: 'Inventaire temps réel',       desc: 'Stock par facility, lots avec dates d\'expiration, seuils d\'alerte. Chaque mouvement tracé instantanément.' },
+  { photo: '/assets/TRANSFERTS INTER-FACILITIES.jpeg',  icon: <ArrowLeftRight size={18} />, title: 'Transferts inter-facilities', desc: 'De la demande à la confirmation de réception — garantie ACID sur chaque transaction de ressource critique.' },
+  { photo: '/assets/CHAÎNE DU FROID IOT.jpg',           icon: <Thermometer size={18} />,    title: 'Chaîne du froid IoT',         desc: 'Capteurs connectés, graphique en continu. Alerte automatique si la plage 2-8°C est dépassée.' },
+  { photo: '/assets/Alertes intelligentes.jpg',         icon: <Bell size={18} />,           title: 'Alertes intelligentes',       desc: 'Stock bas, expiration proche, anomalie de température. Les alertes critiques remontent en temps réel.' },
+  { photo: '/assets/CARTE RÉGIONALE DES STOCKS.jpg',    icon: <Map size={18} />,            title: 'Carte régionale des stocks',  desc: 'Visualisez les surplus et pénuries par zone. Coordonnez les redistributions avant qu\'il soit trop tard.' },
+  { photo: '/assets/AUDIT TRAIL IMMUABLE.jpeg',         icon: <ScrollText size={18} />,     title: 'Audit trail immuable',        desc: 'Chaque action tracée en base append-only. Conformité OMS, UNICEF, bailleurs de fonds internationaux.' },
 ];
 
 const STEPS = [
@@ -21,9 +21,9 @@ const STEPS = [
 ];
 
 const ROLES = [
-  { photo: 'https://images.unsplash.com/photo-j53JZ9sa44M?auto=format&fit=crop&w=600&q=80', tag: 'Facility Manager', title: 'Votre établissement sous contrôle', items: ['Stock en temps réel par département', 'Alertes critiques avant rupture', 'Approbation de transferts en 2 clics', 'Rapports pour les audits'] },
-  { photo: 'https://images.unsplash.com/photo-9T2jTUBAZj0?auto=format&fit=crop&w=600&q=80', tag: 'Field Agent',       title: 'Saisie rapide sur le terrain',    items: ['Scanner un lot à la réception', 'Confirmer une livraison avec PIN', 'Signaler une anomalie en secondes', 'Vue critique de sa zone'] },
-  { photo: 'https://images.unsplash.com/photo-ZgLTbwiRYv4?auto=format&fit=crop&w=600&q=80', tag: 'NGO Coordinator',  title: 'Vision régionale complète',       items: ['Carte de toutes les facilities', 'Identifier surplus vs pénuries', 'Broadcast d\'urgence régional', 'Rapports bailleurs de fonds'] },
+  { photo: '/assets/Facility Manager.jpg',  tag: 'Facility Manager', title: 'Votre établissement sous contrôle', items: ['Stock en temps réel par département', 'Alertes critiques avant rupture', 'Approbation de transferts en 2 clics', 'Rapports pour les audits'] },
+  { photo: '/assets/FIELD AGENT.jpeg',      tag: 'Field Agent',      title: 'Saisie rapide sur le terrain',     items: ['Scanner un lot à la réception', 'Confirmer une livraison avec PIN', 'Signaler une anomalie en secondes', 'Vue critique de sa zone'] },
+  { photo: '/assets/NGO COORDINATOR.jpg',   tag: 'NGO Coordinator',  title: 'Vision régionale complète',        items: ['Carte de toutes les facilities', 'Identifier surplus vs pénuries', 'Broadcast d\'urgence régional', 'Rapports bailleurs de fonds'] },
 ];
 
 const TESTIMONIALS = [

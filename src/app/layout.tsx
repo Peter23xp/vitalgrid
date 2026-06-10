@@ -14,9 +14,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body>
-        <main className="animate-fade-in">
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );

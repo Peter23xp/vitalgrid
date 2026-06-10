@@ -1,4 +1,4 @@
-.container { max-width: 1200px; width: 100%; }
+.container { max-width: 1200px; width: 100%; margin: 0 auto; }
 .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
 .headerTitle { display: flex; align-items: center; gap: 12px; }
 .backLink { color: var(--brand-slate); font-size: 13px; font-weight: 500; text-decoration: none; }

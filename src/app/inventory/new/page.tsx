@@ -36,19 +36,27 @@ export default function AddResourcePage() {
     setError('');
 
     try {
+      // Récupérer le facilityId depuis la session JWT
+      const me = await apiFetch<{ facilityId: string | null }>('/api/auth/me');
+      if (!me.facilityId) {
+        setError('Aucun établissement associé à votre compte. Contactez votre administrateur.');
+        setSubmitting(false);
+        return;
+      }
+
       // 1. Créer la ressource
       const resource = await apiFetch<{ id: string }>('/api/inventory', {
         method: 'POST',
         body: JSON.stringify({
           name,
-          dci:            dci || null,
+          dci:             dci || null,
           category,
-          zone:           zone || null,
+          zone:            zone || null,
           unit_of_measure: unit,
           alert_threshold: threshold ? Number(threshold) : 0,
-          location:       location || null,
-          notes:          notes || null,
-          facility_id:    '',
+          location:        location || null,
+          notes:           notes || null,
+          facility_id:     me.facilityId,
         }),
       });
 

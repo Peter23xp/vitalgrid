@@ -199,7 +199,9 @@
   flex: 1;
   padding: 28px 32px;
   overflow-y: auto;
+  overflow-x: hidden;
   min-width: 0;
+  width: 0; /* force flex child to shrink — prevents table overflow pushing layout */
 }
 
 /* ─── Responsive ─────────────────────────────────────────── */

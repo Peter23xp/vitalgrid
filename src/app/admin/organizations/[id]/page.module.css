@@ -1,18 +1,152 @@
 .container { max-width: 1100px; }
-.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-.headerTitle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.backLink { color: var(--brand-slate); font-size: 13px; font-weight: 500; text-decoration: none; }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.backLink {
+  color: var(--brand-slate);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
 .backLink:hover { color: var(--brand-navy); }
-.title { font-size: 20px; font-weight: 700; color: var(--brand-navy); font-family: var(--font-headline); }
-.tabBar { display: flex; border-bottom: 1px solid var(--border-light); margin-bottom: 20px; }
-.tab { display: flex; align-items: center; gap: 6px; padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--brand-slate); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s; background: none; cursor: pointer; }
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--brand-navy);
+  font-family: var(--font-headline);
+}
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+
+.tabBar {
+  display: flex;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 20px;
+  gap: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brand-slate);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+  background: none;
+  cursor: pointer;
+}
+
 .tab:hover { color: var(--brand-navy); }
-.tabActive { color: var(--brand-navy); border-bottom-color: var(--brand-navy); font-weight: 600; }
-.tableContainer { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px; overflow-x: auto; }
+
+.tabActive {
+  color: var(--brand-navy);
+  border-bottom-color: var(--brand-sage);
+  font-weight: 600;
+}
+
+/* ── Invite form ─────────────────────────────────────────── */
+
+.inviteCard {
+  background: var(--bg-main);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.inviteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.inviteTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-navy);
+}
+
+.inviteForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.inviteField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inviteLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--brand-navy);
+}
+
+/* ── Table ───────────────────────────────────────────────── */
+
+.tableContainer {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
 .table { width: 100%; border-collapse: collapse; }
-.table th { padding: 12px 16px; font-size: 11px; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; border-bottom: 1px solid var(--border-light); background: var(--bg-main); text-align: left; }
-.table td { padding: 14px 16px; font-size: 13px; color: var(--brand-navy); border-bottom: 1px solid var(--border-light); }
+
+.table th {
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--brand-slate);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-main);
+  text-align: left;
+}
+
+.table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--brand-navy);
+  border-bottom: 1px solid var(--border-light);
+}
+
 .row:last-child td { border-bottom: none; }
 .row:hover { background: var(--bg-main); }
-.actionLink { color: var(--brand-sage); font-weight: 500; font-size: 13px; text-decoration: none; }
+
+.actionLink {
+  color: var(--brand-sage);
+  font-weight: 500;
+  font-size: 13px;
+  text-decoration: none;
+}
 .actionLink:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .inviteForm { grid-template-columns: 1fr; }
+  .header { flex-direction: column; }
+}

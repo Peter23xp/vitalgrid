@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
   --mk-navy:      #0F172A;
@@ -11,8 +11,8 @@
   --mk-slate:     #64748B;
   --mk-border:    rgba(255,255,255,0.1);
 
-  --mk-font-display: 'Sora', sans-serif;
-  --mk-font-body:    'Noto Sans', sans-serif;
+  --mk-font-display: 'Barlow Condensed', sans-serif;
+  --mk-font-body:    'Barlow', sans-serif;
   --mk-font-mono:    'Fira Code', monospace;
 }
 

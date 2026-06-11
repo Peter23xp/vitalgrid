@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Building2, Users, Database, Zap, ChevronRight,
   Shield, Globe2, Key, ScrollText, CreditCard,
-  TrendingUp, AlertTriangle, CheckCircle2, Clock
+  TrendingUp, AlertTriangle, CheckCircle2, Clock, Inbox
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useAuth } from '@/contexts/auth';
@@ -26,7 +26,8 @@ const ADMIN_MODULES = [
   { href: '/admin/audit-log',     icon: <ScrollText size={20} />, label: 'Journal d\'audit', desc: 'Trace immuable de toutes les actions', color: 'rgba(15,23,42,0.06)', iconColor: 'var(--brand-navy)' },
   { href: '/admin/billing',       icon: <CreditCard size={20} />, label: 'Facturation',  desc: 'Plans, usage, factures', color: 'rgba(5,150,105,0.1)', iconColor: 'var(--brand-sage)' },
   { href: '/admin/system-status', icon: <Zap size={20} />,      label: 'Statut système', desc: 'Infrastructure, latences, santé des services', color: 'rgba(14,165,233,0.1)', iconColor: 'var(--status-info)' },
-  { href: '/admin/import',        icon: <Database size={20} />, label: 'Import bulk',    desc: 'CSV, JSON, DHIS2 — import multi-org', color: 'rgba(15,23,42,0.06)', iconColor: 'var(--brand-navy)' },
+  { href: '/admin/import',          icon: <Database size={20} />, label: 'Import bulk',        desc: 'CSV, JSON, DHIS2 — import multi-org', color: 'rgba(15,23,42,0.06)', iconColor: 'var(--brand-navy)' },
+  { href: '/admin/access-requests', icon: <Inbox size={20} />,    label: 'Demandes d\'accès',  desc: 'Demandes de démo et d\'accès plateforme', color: 'rgba(14,165,233,0.1)', iconColor: 'var(--status-info)' },
 ];
 
 export default function SuperAdminDashboard() {

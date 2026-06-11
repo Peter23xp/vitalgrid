@@ -1,10 +1,15 @@
-.container { max-width: 1100px; width: 100%; margin: 0 auto; }
+.container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8px 0 48px;
+}
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 40px;
   gap: 16px;
   flex-wrap: wrap;
 }
@@ -36,7 +41,7 @@
 .tabBar {
   display: flex;
   border-bottom: 1px solid var(--border-light);
-  margin-bottom: 20px;
+  margin-bottom: 28px;
   gap: 0;
 }
 
@@ -69,8 +74,8 @@
   background: var(--bg-main);
   border: 1px solid var(--border-light);
   border-radius: 10px;
-  padding: 20px 24px;
-  margin-bottom: 20px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
 }
 
 .inviteHeader {

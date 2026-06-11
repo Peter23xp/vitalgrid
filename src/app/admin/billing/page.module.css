@@ -2,43 +2,47 @@
   max-width: 1000px;
   width: 100%;
   margin: 0 auto;
+  padding: 8px 0 48px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 40px;
 }
 
 .headerTitle {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
 }
 
 .backLink {
-  color: var(--text-secondary);
+  color: var(--brand-slate);
+  font-size: 13px;
   font-weight: 500;
+  text-decoration: none;
   transition: color 0.2s;
 }
 
-.backLink:hover {
-  color: var(--text-primary);
-}
+.backLink:hover { color: var(--brand-navy); }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--brand-navy);
+  font-family: var(--font-headline);
 }
 
+/* Plan card */
 .planCard {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-top: 3px solid var(--brand-navy);
   border-radius: 12px;
-  padding: 1.75rem;
-  margin-bottom: 2rem;
+  padding: 32px 36px;
+  margin-bottom: 48px;
   box-shadow: var(--shadow-md);
 }
 
@@ -46,71 +50,70 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .planOrg {
-  font-size: 1.1rem;
+  font-size: 18px;
   font-weight: 700;
   color: var(--brand-navy);
-  margin-bottom: 0.25rem;
+  margin-bottom: 10px;
 }
 
 .planName {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.25rem;
+  font-size: 14px;
+  color: var(--brand-slate);
+  margin-bottom: 8px;
 }
 
 .planRenewal {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--brand-slate);
 }
 
+/* Sections */
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 48px;
 }
 
 .sectionTitle {
-  font-size: 1rem;
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 1.25rem;
+  margin-bottom: 20px;
   color: var(--brand-navy);
+  font-family: var(--font-headline);
 }
 
+/* Usage */
 .usageList {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 28px;
   box-shadow: var(--shadow-sm);
 }
 
 .usageRow {
   display: grid;
-  grid-template-columns: 140px 1fr auto auto;
+  grid-template-columns: 160px 1fr 80px 100px;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
 }
 
 @media (max-width: 640px) {
-  .usageRow {
-    grid-template-columns: 1fr;
-  }
+  .usageRow { grid-template-columns: 1fr; }
 }
 
 .usageLabel {
-  font-size: 0.875rem;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--brand-navy);
 }
 
-.usageBarWrap {
-  flex: 1;
-}
+.usageBarWrap { flex: 1; }
 
 .usageBar {
   width: 100%;
@@ -126,48 +129,43 @@
   transition: width 0.4s ease;
 }
 
-.usageFillGreen {
-  background: var(--status-success);
-}
-
-.usageFillBlue {
-  background: var(--status-info);
-}
+.usageFillGreen { background: var(--status-success); }
+.usageFillBlue  { background: var(--status-info); }
 
 .usageValue {
-  font-size: 0.875rem;
+  font-size: 13px;
   font-family: var(--font-mono);
-  color: var(--text-primary);
+  color: var(--brand-navy);
   white-space: nowrap;
-}
-
-.usageMeta {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  min-width: 60px;
   text-align: right;
 }
 
+.usageMeta {
+  font-size: 12px;
+  color: var(--brand-slate);
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Plans grid */
 .plansGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  gap: 16px;
 }
 
 @media (max-width: 640px) {
-  .plansGrid {
-    grid-template-columns: 1fr;
-  }
+  .plansGrid { grid-template-columns: 1fr; }
 }
 
 .pricingCard {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
+  gap: 12px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -178,24 +176,24 @@
 }
 
 .pricingName {
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 700;
   color: var(--brand-navy);
-  margin-bottom: 0.5rem;
 }
 
 .pricingPrice {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   color: var(--brand-sage);
-  margin-bottom: 0.25rem;
 }
 
 .pricingDesc {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--brand-slate);
+  line-height: 1.5;
 }
 
+/* Invoices table */
 .tableContainer {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -211,39 +209,33 @@
 }
 
 .table th {
-  padding: 1rem 1.5rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--brand-slate);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
+  font-weight: 600;
   border-bottom: 1px solid var(--border-light);
-  background: rgba(248, 250, 252, 0.5);
+  background: var(--bg-main);
 }
 
 .table td {
-  padding: 1rem 1.5rem;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-light);
-  font-size: 0.9rem;
+  font-size: 13px;
+  color: var(--brand-navy);
 }
 
-.row {
-  transition: background 0.2s;
-}
-
-.row:hover {
-  background: rgba(15, 23, 42, 0.02);
-}
-
-.row:last-child td {
-  border-bottom: none;
-}
+.row { transition: background 0.15s; }
+.row:hover { background: var(--bg-main); }
+.row:last-child td { border-bottom: none; }
 
 .downloadBtn {
-  font-size: 0.8rem;
+  font-size: 12px;
   font-weight: 500;
   color: var(--brand-sage);
-  padding: 4px 10px;
-  border: 1px solid rgba(5, 150, 105, 0.3);
+  padding: 5px 12px;
+  border: 1px solid rgba(5,150,105,0.3);
   border-radius: 6px;
   transition: all 0.2s;
   background: transparent;
@@ -251,6 +243,6 @@
 }
 
 .downloadBtn:hover {
-  background: rgba(5, 150, 105, 0.08);
+  background: rgba(5,150,105,0.08);
   border-color: var(--brand-sage);
 }

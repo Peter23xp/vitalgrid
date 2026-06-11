@@ -2,13 +2,14 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  padding: 8px 0 48px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 40px;
 }
 
 .headerTitle {
@@ -66,7 +67,7 @@
   border: 1px solid var(--border-light);
   border-radius: 12px;
   overflow-x: auto;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .table {

@@ -1,13 +1,16 @@
 import { NextRequest } from 'next/server';
-import { requireTenant } from '@/lib/tenant';
+import { getSession } from '@/lib/auth';
 import { listUsers } from '@/lib/repos/users';
 import { apiOk, apiError } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
+  const session = await getSession(req);
+  if (!session) return apiError('Non authentifié', 401);
+  if (session.role !== 'super_admin') return apiError('Accès refusé', 403);
+
   try {
-    const tenantId = await requireTenant(req);
     const s = req.nextUrl.searchParams;
-    const result = await listUsers(tenantId, {
+    const result = await listUsers(session.tenantId, {
       role:   s.get('role')   ?? undefined,
       status: s.get('status') ?? undefined,
       search: s.get('search') ?? undefined,
@@ -15,9 +18,7 @@ export async function GET(req: NextRequest) {
       limit:  Number(s.get('limit') ?? 25),
     });
     return apiOk(result);
-  } catch (e: unknown) {
-    const err = e as Error;
-    if (err.message === 'ERR_UNAUTHENTICATED') return apiError('x-tenant-id header requis', 401);
+  } catch {
     return apiError('Erreur serveur', 500);
   }
 }

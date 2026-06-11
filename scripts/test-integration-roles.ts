@@ -86,7 +86,7 @@ async function testFieldAgent() {
   check('GET  /api/admin/organizations → 403', adminOrgs.status === 403, `status=${adminOrgs.status}`);
 
   const adminUsers = await request('/api/admin/users', { cookie: ctx.cookie });
-  check('GET  /api/admin/users (comportement)', [200, 403].includes(adminUsers.status), `status=${adminUsers.status}`);
+  check('GET  /api/admin/users → 403', adminUsers.status === 403, `status=${adminUsers.status}`);
 
   await request('/api/auth/logout', { method: 'POST', cookie: ctx.cookie });
 }

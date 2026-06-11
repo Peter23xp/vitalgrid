@@ -199,7 +199,8 @@ async function run() {
   const logout = await request('/api/auth/logout', { method: 'POST', cookie });
   check('POST /api/auth/logout', logout.status === 200, `status=${logout.status}`);
 
-  const meAfter = await request('/api/auth/me', { cookie });
+  // Après logout, on envoie aucun cookie — le serveur doit rejeter avec 401
+  const meAfter = await request('/api/auth/me');
   check('GET  /api/auth/me après logout → 401', meAfter.status === 401, `status=${meAfter.status}`);
 
   summary();

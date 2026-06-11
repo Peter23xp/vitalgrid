@@ -1,66 +1,76 @@
 // scripts/create-test-roles.ts
-// Crée 4 comptes de test dans le même tenant que admin@vitalgrid.io
-import { DsqlSigner } from '@aws-sdk/dsql-signer';
-import { Client }     from 'pg';
-import bcrypt         from 'bcryptjs';
+// Crée 4 comptes de test via l'API (pas besoin d'accès DSQL direct admin)
+// Utilise POST /api/auth/login puis /api/admin/users/invite
 
-const ENDPOINT = process.env.DSQL_CLUSTER_ENDPOINT!;
-const REGION   = process.env.DSQL_REGION ?? 'us-east-1';
-const ADMIN    = 'admin@vitalgrid.io';
-const PASSWORD = 'TestRole2026!';
+const BASE        = 'http://localhost:3000';
+const ADMIN_EMAIL = 'admin@vitalgrid.io';
+const ADMIN_PASS  = 'VitalGrid2026!';
 
 const TEST_USERS = [
-  { email: 'test.facility-manager@vitalgrid.io', name: 'Test FM',    role: 'facility_manager',  needFacility: true  },
-  { email: 'test.field-agent@vitalgrid.io',       name: 'Test FA',    role: 'field_agent',        needFacility: true  },
-  { email: 'test.ngo-coordinator@vitalgrid.io',   name: 'Test NGO',   role: 'ngo_coordinator',    needFacility: false },
-  { email: 'test.auditor@vitalgrid.io',            name: 'Test Audit', role: 'auditor',            needFacility: false },
+  { email: 'test.facility-manager@vitalgrid.io', name: 'Test FM',    role: 'facility_manager'  },
+  { email: 'test.field-agent@vitalgrid.io',       name: 'Test FA',    role: 'field_agent'        },
+  { email: 'test.ngo-coordinator@vitalgrid.io',   name: 'Test NGO',   role: 'ngo_coordinator'    },
+  { email: 'test.auditor@vitalgrid.io',            name: 'Test Audit', role: 'auditor'            },
 ];
 
-async function run() {
-  const signer = new DsqlSigner({ hostname: ENDPOINT, region: REGION });
-  const token  = await signer.getDbConnectAdminAuthToken();
-  const client = new Client({
-    host: ENDPOINT, port: 5432, database: 'postgres',
-    user: 'admin', password: token, ssl: { rejectUnauthorized: true },
+async function apiFetch(path: string, opts: { method?: string; body?: unknown; cookie?: string } = {}) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (opts.cookie) headers['Cookie'] = opts.cookie;
+
+  const res = await globalThis.fetch(`${BASE}${path}`, {
+    method: opts.method ?? 'GET',
+    headers,
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
-  await client.connect();
 
-  try {
-    // Récupérer le contexte de l'admin
-    const adminRow = await client.query(
-      `SELECT tenant_id, org_id, facility_id FROM users WHERE email = $1`,
-      [ADMIN]
-    );
-    if (adminRow.rowCount === 0) {
-      console.error(`Admin "${ADMIN}" introuvable.`);
-      process.exit(1);
-    }
-    const { tenant_id, org_id, facility_id } = adminRow.rows[0];
-    const hash = await bcrypt.hash(PASSWORD, 12);
+  const getSetCookie = (res.headers as any).getSetCookie as ((this: Headers) => string[]) | undefined;
+  const rawCookies: string[] = getSetCookie ? getSetCookie.call(res.headers) : [];
+  const cookie = rawCookies.map((c: string) => c.split(';')[0]).join('; ');
 
-    console.log(`\n→ Tenant : ${tenant_id}`);
-    console.log(`→ Org    : ${org_id}`);
-    console.log(`→ Facility: ${facility_id ?? '(aucune)'}\n`);
+  let data: unknown = null;
+  try { data = await res.json(); } catch { /* empty */ }
 
-    for (const u of TEST_USERS) {
-      const fid = u.needFacility ? facility_id : null;
-      await client.query(
-        `INSERT INTO users
-           (tenant_id, org_id, facility_id, email, name, role, password_hash, status)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,'active')
-         ON CONFLICT (email) DO UPDATE SET
-           password_hash = EXCLUDED.password_hash,
-           role          = EXCLUDED.role,
-           facility_id   = EXCLUDED.facility_id`,
-        [tenant_id, org_id, fid, u.email, u.name, u.role, hash]
-      );
-      console.log(`✓ ${u.role.padEnd(20)}  ${u.email}`);
-    }
+  return { status: res.status, data, cookie };
+}
 
-    console.log(`\nMot de passe : ${PASSWORD}\n`);
-  } finally {
-    await client.end();
+async function run() {
+  console.log('\n→ Connexion admin...');
+
+  const login = await apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: { email: ADMIN_EMAIL, password: ADMIN_PASS },
+  });
+
+  if (login.status !== 200) {
+    console.error(`Échec login admin (${login.status}):`, login.data);
+    process.exit(1);
   }
+
+  const cookie = login.cookie;
+  const orgId  = (login.data as { user: { orgId: string } }).user?.orgId;
+  console.log(`✓ Connecté — orgId: ${orgId}\n`);
+
+  const tempPasswords: Record<string, string> = {};
+
+  for (const u of TEST_USERS) {
+    const res = await apiFetch('/api/admin/users/invite', {
+      method: 'POST',
+      cookie,
+      body: { email: u.email, name: u.name, role: u.role, orgId, password: 'TestRole2026!' },
+    });
+
+    if (res.status === 201) {
+      const tmp = (res.data as { tempPassword?: string })?.tempPassword ?? '(envoyé par email)';
+      tempPasswords[u.email] = tmp;
+      console.log(`✓ ${u.role.padEnd(20)}  ${u.email}  mdp: ${tmp}`);
+    } else if (res.status === 409) {
+      console.log(`~ ${u.role.padEnd(20)}  ${u.email}  (déjà existant)`);
+    } else {
+      console.error(`✗ ${u.role.padEnd(20)}  ${u.email}  ERREUR ${res.status}:`, JSON.stringify(res.data));
+    }
+  }
+
+  console.log('\nMot de passe pour tous les comptes de test : TestRole2026!\n');
 }
 
 run().catch(e => { console.error(e); process.exit(1); });

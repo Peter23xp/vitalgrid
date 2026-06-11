@@ -18,27 +18,21 @@ export async function request(
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (opts.cookie) headers['Cookie'] = opts.cookie;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5000);
-
   let res: Response;
   try {
-    res = await fetch(`${BASE}${path}`, {
+    res = await globalThis.fetch(`${BASE}${path}`, {
       method: opts.method ?? 'GET',
       headers,
       body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-      signal: controller.signal,
     });
   } catch (err: unknown) {
-    clearTimeout(timer);
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(`Erreur réseau ${opts.method ?? 'GET'} ${BASE}${path}: ${msg}`);
   }
-  clearTimeout(timer);
 
   // Extraire tous les Set-Cookie et les combiner
-  const getSetCookie = (res.headers as any).getSetCookie as (() => string[]) | undefined;
-  const rawCookies = getSetCookie?.() ?? [];
+  const getSetCookie = (res.headers as any).getSetCookie as ((this: Headers) => string[]) | undefined;
+  const rawCookies: string[] = getSetCookie ? getSetCookie.call(res.headers) : [];
   const cookie = rawCookies.map((c: string) => c.split(';')[0]).join('; ');
 
   let data: unknown = null;

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!session) return apiError('Non authentifié', 401);
   if (session.role !== 'super_admin') return apiError('Accès refusé', 403);
 
-  const { email, name, role, orgId } = await req.json();
+  const { email, name, role, orgId, password: customPassword } = await req.json();
   if (!email || !name || !role || !orgId) {
     return apiError('email, name, role et orgId sont requis');
   }
@@ -22,8 +22,10 @@ export async function POST(req: NextRequest) {
 
   if (!org) return apiError('Organisation introuvable', 404);
 
-  // Mot de passe temporaire — l'utilisateur devra le changer
-  const tempPassword = `VitalGrid${Math.random().toString(36).slice(-6).toUpperCase()}!`;
+  // Mot de passe : personnalisé (dev) ou temporaire aléatoire
+  const tempPassword = (process.env.NODE_ENV !== 'production' && customPassword)
+    ? customPassword
+    : `VitalGrid${Math.random().toString(36).slice(-6).toUpperCase()}!`;
   const password_hash = await bcrypt.hash(tempPassword, 12);
 
   try {

@@ -36,7 +36,7 @@ const ROLE_ROUTES: Array<{ pattern: RegExp; roles: Role[] }> = [
   { pattern: /^\/dashboard\/field/, roles: ['field_agent', 'super_admin'] },
   { pattern: /^\/dashboard$/,       roles: ['facility_manager', 'field_agent', 'ngo_coordinator', 'auditor'] },
   { pattern: /^\/analytics/,        roles: ['facility_manager', 'ngo_coordinator', 'auditor', 'super_admin'] },
-  { pattern: /^\/facilities/,       roles: ['ngo_coordinator', 'facility_manager', 'super_admin'] },
+  { pattern: /^\/facilities/,       roles: ['ngo_coordinator', 'facility_manager'] },
 ];
 
 const ROLE_DASHBOARDS: Record<Role, string> = {

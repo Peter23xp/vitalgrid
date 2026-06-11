@@ -122,7 +122,6 @@ function getNavGroups(role: Role): NavGroup[] {
     case 'super_admin':
       return [
         { ...dashboard, items: [{ href: '/dashboard/admin', label: 'Vue globale', icon: <ShieldCheck size={15} /> }] },
-        facilities,
         admin,
       ];
 

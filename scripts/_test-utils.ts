@@ -18,18 +18,37 @@ export async function request(
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (opts.cookie) headers['Cookie'] = opts.cookie;
 
-  const res = await fetch(`${BASE}${path}`, {
-    method: opts.method ?? 'GET',
-    headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      method: opts.method ?? 'GET',
+      headers,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (err: unknown) {
+    clearTimeout(timer);
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Erreur réseau ${opts.method ?? 'GET'} ${BASE}${path}: ${msg}`);
+  }
+  clearTimeout(timer);
 
   // Extraire tous les Set-Cookie et les combiner
-  const rawCookies: string[] = (res.headers as unknown as { getSetCookie?: () => string[] }).getSetCookie?.() ?? [];
-  const cookie = rawCookies.map(c => c.split(';')[0]).join('; ');
+  const getSetCookie = (res.headers as any).getSetCookie as (() => string[]) | undefined;
+  const rawCookies = getSetCookie?.() ?? [];
+  const cookie = rawCookies.map((c: string) => c.split(';')[0]).join('; ');
 
   let data: unknown = null;
-  try { data = await res.json(); } catch { /* empty body */ }
+  try {
+    data = await res.json();
+  } catch {
+    if (res.status >= 400) {
+      process.stderr.write(`  \x1b[90m⚠ Corps non-JSON pour ${opts.method ?? 'GET'} ${path} (${res.status})\x1b[0m\n`);
+    }
+  }
 
   return { status: res.status, data, cookie };
 }

@@ -1,0 +1,150 @@
+.container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8px 0 48px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backLink {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--text-primary);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.pendingBadge {
+  font-size: 0.75rem;
+}
+
+.filtersBar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.select {
+  width: auto;
+  min-width: 180px;
+  cursor: pointer;
+}
+
+.resultsInfo {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+}
+
+.tableContainer {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 1rem 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-light);
+  background: rgba(248, 250, 252, 0.5);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.row {
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.row:last-child td {
+  border-bottom: none;
+}
+
+.nameCell {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.messageCell {
+  max-width: 240px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--brand-sage);
+  padding: 4px 10px;
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  border-radius: 6px;
+  transition: all 0.2s;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.actionBtn:hover:not(:disabled) {
+  background: rgba(5, 150, 105, 0.08);
+  border-color: var(--brand-sage);
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionBtnDanger {
+  color: #DC2626;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.actionBtnDanger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: #EF4444;
+}

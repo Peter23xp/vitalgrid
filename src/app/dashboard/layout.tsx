@@ -10,7 +10,7 @@ import {
   BellRing, Thermometer, ClipboardList,
   Map, TrendingUp, FileWarning, BarChart2, Download,
   Building2, MapPin,
-  Users, Lock, Settings, KeyRound, ScrollText, CreditCard, Activity
+  Users, Lock, Settings, KeyRound, ScrollText, CreditCard, Activity, Inbox
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/contexts/auth';
 import type { Role } from '@/lib/types';
@@ -100,13 +100,14 @@ function getNavGroups(role: Role): NavGroup[] {
   const admin: NavGroup = {
     title: 'Administration',
     items: [
-      { href: '/admin/users',         label: 'Utilisateurs',  icon: <Users size={15} /> },
-      { href: '/admin/organizations', label: 'Organisations', icon: <Building2 size={15} /> },
-      { href: '/admin/roles',         label: 'Rôles',         icon: <Lock size={15} /> },
-      { href: '/admin/api-keys',      label: 'Clés API',      icon: <KeyRound size={15} /> },
-      { href: '/admin/audit-log',     label: 'Journal audit', icon: <ScrollText size={15} /> },
-      { href: '/admin/billing',       label: 'Facturation',   icon: <CreditCard size={15} /> },
-      { href: '/admin/system-status', label: 'Statut système',icon: <Activity size={15} /> },
+      { href: '/admin/users',           label: 'Utilisateurs',    icon: <Users size={15} /> },
+      { href: '/admin/organizations',   label: 'Organisations',   icon: <Building2 size={15} /> },
+      { href: '/admin/roles',           label: 'Rôles',           icon: <Lock size={15} /> },
+      { href: '/admin/api-keys',        label: 'Clés API',        icon: <KeyRound size={15} /> },
+      { href: '/admin/audit-log',       label: 'Journal audit',   icon: <ScrollText size={15} /> },
+      { href: '/admin/access-requests', label: 'Demandes accès',  icon: <Inbox size={15} /> },
+      { href: '/admin/billing',         label: 'Facturation',     icon: <CreditCard size={15} /> },
+      { href: '/admin/system-status',   label: 'Statut système',  icon: <Activity size={15} /> },
     ],
   };
 

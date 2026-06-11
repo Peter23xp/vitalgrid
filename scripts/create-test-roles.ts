@@ -25,39 +25,42 @@ async function run() {
   });
   await client.connect();
 
-  // Récupérer le contexte de l'admin
-  const adminRow = await client.query(
-    `SELECT tenant_id, org_id, facility_id FROM users WHERE email = $1`,
-    [ADMIN]
-  );
-  if (adminRow.rowCount === 0) {
-    console.error(`Admin "${ADMIN}" introuvable.`);
-    process.exit(1);
-  }
-  const { tenant_id, org_id, facility_id } = adminRow.rows[0];
-  const hash = await bcrypt.hash(PASSWORD, 12);
-
-  console.log(`\n→ Tenant : ${tenant_id}`);
-  console.log(`→ Org    : ${org_id}`);
-  console.log(`→ Facility: ${facility_id ?? '(aucune)'}\n`);
-
-  for (const u of TEST_USERS) {
-    const fid = u.needFacility ? facility_id : null;
-    await client.query(
-      `INSERT INTO users
-         (tenant_id, org_id, facility_id, email, name, role, password_hash, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,'active')
-       ON CONFLICT (email) DO UPDATE SET
-         password_hash = EXCLUDED.password_hash,
-         role          = EXCLUDED.role,
-         facility_id   = EXCLUDED.facility_id`,
-      [tenant_id, org_id, fid, u.email, u.name, u.role, hash]
+  try {
+    // Récupérer le contexte de l'admin
+    const adminRow = await client.query(
+      `SELECT tenant_id, org_id, facility_id FROM users WHERE email = $1`,
+      [ADMIN]
     );
-    console.log(`✓ ${u.role.padEnd(20)}  ${u.email}`);
-  }
+    if (adminRow.rowCount === 0) {
+      console.error(`Admin "${ADMIN}" introuvable.`);
+      process.exit(1);
+    }
+    const { tenant_id, org_id, facility_id } = adminRow.rows[0];
+    const hash = await bcrypt.hash(PASSWORD, 12);
 
-  await client.end();
-  console.log(`\nMot de passe : ${PASSWORD}\n`);
+    console.log(`\n→ Tenant : ${tenant_id}`);
+    console.log(`→ Org    : ${org_id}`);
+    console.log(`→ Facility: ${facility_id ?? '(aucune)'}\n`);
+
+    for (const u of TEST_USERS) {
+      const fid = u.needFacility ? facility_id : null;
+      await client.query(
+        `INSERT INTO users
+           (tenant_id, org_id, facility_id, email, name, role, password_hash, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,'active')
+         ON CONFLICT (email) DO UPDATE SET
+           password_hash = EXCLUDED.password_hash,
+           role          = EXCLUDED.role,
+           facility_id   = EXCLUDED.facility_id`,
+        [tenant_id, org_id, fid, u.email, u.name, u.role, hash]
+      );
+      console.log(`✓ ${u.role.padEnd(20)}  ${u.email}`);
+    }
+
+    console.log(`\nMot de passe : ${PASSWORD}\n`);
+  } finally {
+    await client.end();
+  }
 }
 
 run().catch(e => { console.error(e); process.exit(1); });

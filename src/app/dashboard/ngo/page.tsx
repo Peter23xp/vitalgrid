@@ -17,7 +17,7 @@ export default function NgoCoordinatorDashboard() {
 
   useEffect(() => {
     Promise.all([
-      apiFetch<{ data: Facility[]; total: number }>('/api/facilities?limit=50'),
+      fetch('/api/facilities/regional?limit=200', { credentials: 'same-origin' }).then(r => r.json()) as Promise<{ data: Facility[]; total: number }>,
       apiFetch<{ data: Transfer[] }>('/api/transfers?limit=50'),
     ]).then(([f, t]) => {
       setFacilities(f.data);

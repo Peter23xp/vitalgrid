@@ -42,14 +42,15 @@ function NewTransferForm() {
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
 
-  // Charger les établissements disponibles
+  // Charger les établissements régionaux (toutes orgs du même pays)
   useEffect(() => {
-    apiFetch<{ data: Facility[] }>('/api/facilities?limit=50')
-      .then((r) => setFacilities(r.data))
+    fetch('/api/facilities/regional?limit=200', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((res) => setFacilities(res.data ?? []))
       .catch(console.error);
   }, []);
 
-  // Pré-remplir depuis les query params (?resource=id)
+  // Pré-remplir depuis les query params (?resource=id&sourceFacilityId=id)
   useEffect(() => {
     const resourceId = searchParams.get('resource');
     if (resourceId) {
@@ -57,6 +58,8 @@ function NewTransferForm() {
         .then(setSelectedResource)
         .catch(console.error);
     }
+    const sourceFacilityId = searchParams.get('sourceFacilityId');
+    if (sourceFacilityId) setSelectedFacility(sourceFacilityId);
   }, [searchParams]);
 
   // Recherche de ressources

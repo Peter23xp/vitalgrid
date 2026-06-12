@@ -53,9 +53,10 @@ export async function createTransfer(
   }
 ): Promise<Transfer> {
   return transact(async (client) => {
+    // Recherche sans filtre tenant pour autoriser les transferts cross-org
     const res = await client.query(
-      'SELECT total_quantity FROM resources WHERE tenant_id = $1 AND id = $2',
-      [tenantId, data.resource_id]
+      'SELECT total_quantity FROM resources WHERE id = $1',
+      [data.resource_id]
     );
     if (res.rowCount === 0) throw new Error('ERR_RESOURCE_NOT_FOUND');
 

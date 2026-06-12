@@ -15,6 +15,8 @@ export type FacilityPin = {
   status: 'critical' | 'warning' | 'ok' | 'offline';
   shortages?: number;
   lastSync?: string;
+  orgName?: string;
+  tenantId?: string;
 };
 
 const STATUS_COLOR: Record<FacilityPin['status'], string> = {
@@ -85,6 +87,9 @@ export default function FacilitiesMap({
           <Popup>
             <div style={{ minWidth: 180, fontFamily: 'DM Sans, sans-serif', fontSize: 13 }}>
               <p style={{ fontWeight: 700, marginBottom: 4, color: '#0F172A' }}>{f.name}</p>
+              {f.orgName && (
+                <p style={{ color: '#059669', fontSize: 11, fontWeight: 600, marginBottom: 2 }}>{f.orgName}</p>
+              )}
               <p style={{ color: '#64748B', marginBottom: 6, fontSize: 12 }}>{f.region}</p>
               {f.shortages !== undefined && f.shortages > 0 && (
                 <p style={{ color: STATUS_COLOR[f.status], fontWeight: 600, marginBottom: 4 }}>
@@ -102,12 +107,18 @@ export default function FacilitiesMap({
                   Sync : {f.lastSync}
                 </p>
               )}
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <Link
                   href={`/facilities/${f.id}`}
                   style={{ fontSize: 12, color: '#059669', fontWeight: 600, textDecoration: 'none' }}
                 >
                   Voir détails
+                </Link>
+                <Link
+                  href={`/transfers/new?sourceFacilityId=${f.id}`}
+                  style={{ fontSize: 12, color: '#0EA5E9', fontWeight: 600, textDecoration: 'none' }}
+                >
+                  Demander →
                 </Link>
                 <Link
                   href={`/transfers/broadcast?facilityId=${f.id}`}

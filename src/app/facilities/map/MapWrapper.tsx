@@ -23,6 +23,8 @@ interface ApiFacility {
   lat: number | null;
   lng: number | null;
   status: string;
+  org_name?: string;
+  tenant_id?: string;
 }
 
 export default function MapWrapper() {
@@ -30,7 +32,7 @@ export default function MapWrapper() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/facilities?limit=200', { credentials: 'same-origin' })
+    fetch('/api/facilities/regional?limit=200', { credentials: 'same-origin' })
       .then((r) => r.json())
       .then((res) => {
         const data: ApiFacility[] = res.data ?? [];
@@ -44,6 +46,8 @@ export default function MapWrapper() {
             lng:      Number(f.lng),
             status:   (['critical', 'warning', 'ok', 'offline'].includes(f.status)
                         ? f.status : 'ok') as FacilityPin['status'],
+            orgName:  f.org_name,
+            tenantId: f.tenant_id,
           }));
         setPins(mapped);
       })

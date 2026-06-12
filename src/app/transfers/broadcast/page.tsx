@@ -1,11 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, Megaphone } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import styles from './page.module.css';
+
+interface Facility {
+  id: string;
+  name: string;
+  region: string | null;
+  org_name: string;
+}
 
 export default function BroadcastPage() {
   const router = useRouter();
@@ -18,6 +25,22 @@ export default function BroadcastPage() {
   const [message, setMessage]           = useState('');
   const [submitting, setSubmitting]     = useState(false);
   const [error, setError]               = useState('');
+  const [facilities, setFacilities]     = useState<Facility[]>([]);
+
+  useEffect(() => {
+    fetch('/api/facilities/regional?limit=200', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((res) => setFacilities(res.data ?? []))
+      .catch(console.error);
+  }, []);
+
+  const regions = Array.from(
+    new Set(facilities.map((f) => f.region).filter(Boolean) as string[])
+  ).sort();
+
+  const targetCount = region
+    ? facilities.filter((f) => f.region === region).length
+    : facilities.length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +115,9 @@ export default function BroadcastPage() {
               onChange={(e) => setFacilityId(e.target.value)}
             >
               <option value="">Sélectionner un établissement...</option>
+              {facilities.map((f) => (
+                <option key={f.id} value={f.id}>{f.name}{f.org_name ? ` — ${f.org_name}` : ''}</option>
+              ))}
             </select>
           </div>
 
@@ -119,6 +145,10 @@ export default function BroadcastPage() {
               onChange={(e) => setRegion(e.target.value)}
             >
               <option value="">Sélectionner une région...</option>
+              <option value="__all__">Tout le pays</option>
+              {regions.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
             </select>
           </div>
 
@@ -154,7 +184,7 @@ export default function BroadcastPage() {
           <div className={styles.formGroupFull}>
             <div className={styles.infoRow}>
               <span className={styles.infoIcon}>ℹ</span>
-              <span>Établissements qui recevront le broadcast&nbsp;: <strong>--</strong></span>
+              <span>Établissements qui recevront le broadcast&nbsp;: <strong>{targetCount}</strong></span>
             </div>
           </div>
 

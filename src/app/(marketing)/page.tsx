@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { ArrowRight, Package, Bell, ArrowLeftRight, Thermometer, Map, ScrollText } from 'lucide-react';
 import styles from './page.module.css';
 
+const SPONSORS = [
+  'UNICEF', 'OMS', 'MSF', 'Croix-Rouge', 'USAID', 'GAVI', 'Fonds Mondial',
+  'UNFPA', 'OCHA', 'IRC', 'IMC', 'ACF', 'Médecins du Monde',
+];
+
 const FEATURES = [
   { photo: '/assets/INVENTAIRE TEMPS RÉEL.jpg',         icon: <Package size={18} />,        title: 'Inventaire temps réel',       desc: 'Stock par facility, lots avec dates d\'expiration, seuils d\'alerte. Chaque mouvement tracé instantanément.' },
   { photo: '/assets/TRANSFERTS INTER-FACILITIES.jpeg',  icon: <ArrowLeftRight size={18} />, title: 'Transferts inter-facilities', desc: 'De la demande à la confirmation de réception — garantie ACID sur chaque transaction de ressource critique.' },
@@ -137,20 +142,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Stats ─────────────────────────────────────────── */}
-      <section style={{ background: '#059669' }}>
-        <div className="mk-container">
-          <div className={styles.statsGrid}>
-            {[
-              { num: '44',    label: 'Écrans opérationnels' },
-              { num: '< 2',   label: 'Minutes par transfert urgent' },
-              { num: 'ACID',  label: 'Garantie intégrité DSQL' },
-              { num: 'WCAG',  label: 'AA · Accessibilité inclusive' },
-            ].map((s, i) => (
-              <div key={i} className={styles.statBox}>
-                <div className={styles.statNumber}>{s.num}</div>
-                <div className={styles.statLabel}>{s.label}</div>
-              </div>
+      {/* ── Sponsor Ticker ────────────────────────────────── */}
+      <section className={styles.tickerSection}>
+        <div className={styles.tickerLabel}>Nos partenaires</div>
+        <div className={styles.tickerTrack} aria-hidden="true">
+          <div className={styles.tickerList}>
+            {SPONSORS.concat(SPONSORS).map((s, i) => (
+              <span key={i} className={styles.tickerItem}>{s}</span>
             ))}
           </div>
         </div>

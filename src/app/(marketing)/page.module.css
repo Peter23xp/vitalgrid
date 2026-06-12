@@ -260,25 +260,71 @@
 
 .roleList li::before { content: '→'; color: #059669; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
-/* ── Stats ─────────────────────────────────────────────────── */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+/* ── Sponsor Ticker ─────────────────────────────────────────── */
+.tickerSection {
+  background: #059669;
+  padding: 28px 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 32px;
 }
 
-.statBox { text-align: center; padding: 40px 16px; }
-
-.statNumber {
-  font-family: var(--mk-font-display);
-  font-size: clamp(40px, 5vw, 64px);
-  font-weight: 800; color: #fff;
-  text-transform: uppercase; line-height: 1; margin-bottom: 6px;
-}
-
-.statLabel {
-  font-size: 12px; color: rgba(255,255,255,0.75);
+.tickerLabel {
+  flex-shrink: 0;
+  padding-left: clamp(24px, 5vw, 80px);
   font-family: var(--mk-font-mono);
-  text-transform: uppercase; letter-spacing: 0.8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+.tickerTrack {
+  flex: 1;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent);
+}
+
+.tickerList {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+  animation: ticker-scroll 32s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tickerList { animation: none; }
+}
+
+.tickerItem {
+  display: inline-block;
+  padding: 0 40px;
+  font-family: var(--mk-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.tickerItem::after {
+  content: '·';
+  position: absolute;
+  right: -2px;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 400;
 }
 
 /* ── Testimonials ─────────────────────────────────────────── */
@@ -385,7 +431,7 @@
 @media (max-width: 1024px) {
   .featuresGrid { grid-template-columns: repeat(2, 1fr); }
   .stepsGrid    { grid-template-columns: 1fr; }
-  .statsGrid    { grid-template-columns: repeat(2, 1fr); }
+  .tickerLabel  { display: none; }
 }
 
 @media (max-width: 768px) {

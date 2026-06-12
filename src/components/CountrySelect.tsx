@@ -12,9 +12,10 @@ interface Props {
   placeholder?: string;
   required?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export default function CountrySelect({ value, onChange, placeholder = 'Sélectionner un pays...', required, className }: Props) {
+export default function CountrySelect({ value, onChange, placeholder = 'Sélectionner un pays...', required, className, style }: Props) {
   const countryList = Object.entries(countries.getNames('fr', { select: 'official' }))
     .sort(([, a], [, b]) => a.localeCompare(b, 'fr'));
 
@@ -24,6 +25,7 @@ export default function CountrySelect({ value, onChange, placeholder = 'Sélecti
       onChange={(e) => onChange(e.target.value)}
       required={required}
       className={className}
+      style={style}
     >
       <option value="">{placeholder}</option>
       {countryList.map(([code, name]) => (

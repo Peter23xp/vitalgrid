@@ -81,9 +81,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <label style={labelStyle}>Pays *</label>
-              <div style={inputStyle}>
-                <CountrySelect value={form.country} onChange={(v) => setForm((f) => ({ ...f, country: v }))} required className="" />
-              </div>
+              <CountrySelect value={form.country} onChange={(v) => setForm((f) => ({ ...f, country: v }))} required style={inputStyle} />
             </div>
           </div>
           <div>

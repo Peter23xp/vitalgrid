@@ -71,9 +71,7 @@ export default function DemoPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <label style={labelStyle}>Pays *</label>
-              <div style={inputStyle}>
-                <CountrySelect value={form.country} onChange={(v) => setForm((f) => ({ ...f, country: v }))} required className="" />
-              </div>
+              <CountrySelect value={form.country} onChange={(v) => setForm((f) => ({ ...f, country: v }))} required style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>Nombre d&apos;établissements</label>

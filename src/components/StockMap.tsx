@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 export type StockPoint = {
@@ -18,6 +19,22 @@ const STATUS_COLOR: Record<StockPoint['status'], string> = {
   warning:  '#EAB308',
   ok:       '#22C55E',
 };
+
+function makePinIcon(color: string) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 24 14 24S28 23.333 28 14C28 6.268 21.732 0 14 0z"
+            fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="14" cy="14" r="5" fill="white"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [28, 38],
+    iconAnchor: [14, 38],
+    popupAnchor: [0, -40],
+  });
+}
 
 function RecenterMap({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
@@ -60,18 +77,11 @@ export default function StockMap({
       <RecenterMap center={center} zoom={zoom} />
 
       {points.map((p) => {
-        const radius = 8 + Math.round((p.stock / maxStock) * 24);
         return (
-          <CircleMarker
+          <Marker
             key={p.id}
-            center={[p.lat, p.lng]}
-            radius={radius}
-            pathOptions={{
-              color: STATUS_COLOR[p.status],
-              fillColor: STATUS_COLOR[p.status],
-              fillOpacity: 0.7,
-              weight: 2,
-            }}
+            position={[p.lat, p.lng]}
+            icon={makePinIcon(STATUS_COLOR[p.status])}
           >
             <Popup>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, minWidth: 160 }}>
@@ -81,7 +91,7 @@ export default function StockMap({
                 </p>
               </div>
             </Popup>
-          </CircleMarker>
+          </Marker>
         );
       })}
 

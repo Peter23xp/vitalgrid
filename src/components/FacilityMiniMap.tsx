@@ -1,6 +1,7 @@
 'use client';
 
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 type Props = {
@@ -19,6 +20,22 @@ const statusColor = (s?: string) => {
   return '#22C55E';
 };
 
+function makePinIcon(color: string) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 24 14 24S28 23.333 28 14C28 6.268 21.732 0 14 0z"
+            fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="14" cy="14" r="5" fill="white"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [28, 38],
+    iconAnchor: [14, 38],
+    popupAnchor: [0, -40],
+  });
+}
+
 export default function FacilityMiniMap({ lat, lng, name, region, status, height = '280px' }: Props) {
   const color = statusColor(status);
   return (
@@ -32,11 +49,7 @@ export default function FacilityMiniMap({ lat, lng, name, region, status, height
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <CircleMarker
-        center={[lat, lng]}
-        radius={14}
-        pathOptions={{ color, fillColor: color, fillOpacity: 0.85, weight: 2 }}
-      >
+      <Marker position={[lat, lng]} icon={makePinIcon(color)}>
         <Popup>
           <div style={{ minWidth: 160, fontFamily: 'DM Sans, sans-serif', fontSize: 13 }}>
             <p style={{ fontWeight: 700, marginBottom: 4, color: '#0F172A' }}>{name}</p>
@@ -46,7 +59,7 @@ export default function FacilityMiniMap({ lat, lng, name, region, status, height
             </p>
           </div>
         </Popup>
-      </CircleMarker>
+      </Marker>
     </MapContainer>
   );
 }

@@ -38,6 +38,10 @@ export async function getFacility(tenantId: string, id: string): Promise<Facilit
   );
 }
 
+export async function getFacilityById(id: string): Promise<Facility | null> {
+  return queryOne<Facility>('SELECT * FROM facilities WHERE id = $1', [id]);
+}
+
 export async function createFacility(
   tenantId: string, orgId: string,
   data: { name: string; type: string; country_code: string; region?: string; address?: string; lat?: number; lng?: number; contact_name?: string; contact_phone?: string; contact_email?: string; storage_zones?: string[]; bed_capacity?: number }

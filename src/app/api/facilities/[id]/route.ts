@@ -1,14 +1,17 @@
 import { NextRequest } from 'next/server';
 import { requireTenant } from '@/lib/tenant';
-import { getFacility } from '@/lib/repos/facilities';
+import { getFacility, getFacilityById } from '@/lib/repos/facilities';
+import { getSession } from '@/lib/auth';
 import { transact } from '@/lib/db';
 import { apiOk, apiError } from '@/lib/types';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const tenantId = await requireTenant(req);
+    const session = await getSession(req);
+    if (!session) return apiError('Non authentifié', 401);
     const { id } = await params;
-    const facility = await getFacility(tenantId, id);
+    // Pas de filtre tenant — une facility régionale (autre org) doit être lisible
+    const facility = await getFacilityById(id);
     if (!facility) return apiError('Établissement introuvable', 404);
     return apiOk(facility);
   } catch (e: unknown) {

@@ -83,7 +83,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ─────────────────────────────────────── */}
-      <section className="mk-section" style={{ background: '#F8FAFC' }}>
+      <section id="features" className="mk-section" style={{ background: '#F8FAFC' }}>
         <div className="mk-container">
           <span className={styles.sectionEyebrow}>Fonctionnalités</span>
           <h2 className={styles.sectionH2}>Tout ce dont votre réseau a besoin</h2>
@@ -121,7 +121,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Roles ─────────────────────────────────────────── */}
-      <section className="mk-section" style={{ background: '#fff' }}>
+      <section id="use-cases" className="mk-section" style={{ background: '#fff' }}>
         <div className="mk-container">
           <span className={styles.sectionEyebrow}>Cas d&apos;usage</span>
           <h2 className={styles.sectionH2}>Conçu pour chaque rôle</h2>

@@ -15,7 +15,7 @@ export async function listResources(
 
   if (opts.category) { conditions.push(`category = $${i++}`); params.push(opts.category); }
   if (opts.zone)     { conditions.push(`zone = $${i++}`);     params.push(opts.zone); }
-  if (opts.search)   { conditions.push(`(name ILIKE $${i} OR dci ILIKE $${i++})`); params.push(`%${opts.search}%`); }
+  if (opts.search)   { conditions.push(`(name ILIKE $${i++} OR dci ILIKE $${i++})`); params.push(`%${opts.search}%`, `%${opts.search}%`); }
   if (opts.status === 'critical') { conditions.push(`total_quantity <= alert_threshold`); }
   if (opts.status === 'ok')       { conditions.push(`total_quantity > alert_threshold`); }
 

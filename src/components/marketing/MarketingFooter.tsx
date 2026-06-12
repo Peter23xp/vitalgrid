@@ -14,7 +14,7 @@ const COL = [
   {
     title: 'Entreprise',
     links: [
-      { href: '#about',   label: 'À propos' },
+      { href: '/about',   label: 'À propos' },
       { href: '/contact', label: 'Contact' },
     ],
   },

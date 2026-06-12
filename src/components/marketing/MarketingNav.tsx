@@ -35,6 +35,8 @@ export default function MarketingNav() {
             { href: '#features',  label: 'Fonctionnalités' },
             { href: '#use-cases', label: 'Cas d\'usage' },
             { href: '#pricing',   label: 'Tarifs' },
+            { href: '/about',     label: 'À propos' },
+            { href: '/contact',   label: 'Contact' },
           ].map((l) => (
             <a key={l.href} href={l.href}
               style={{ color: textColorMuted, fontSize: 14, fontWeight: 500, transition: 'color 0.15s', textDecoration: 'none' }}
@@ -78,6 +80,8 @@ export default function MarketingNav() {
             { href: '#features',  label: 'Fonctionnalités' },
             { href: '#use-cases', label: 'Cas d\'usage' },
             { href: '#pricing',   label: 'Tarifs' },
+            { href: '/about',     label: 'À propos' },
+            { href: '/contact',   label: 'Contact' },
           ].map((l) => (
             <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
               style={{ display: 'block', color: 'rgba(255,255,255,0.8)', padding: '12px 0', fontSize: 16, borderBottom: '1px solid rgba(255,255,255,0.06)', textDecoration: 'none' }}>

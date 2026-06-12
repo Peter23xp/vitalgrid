@@ -270,7 +270,7 @@ export default function FacilityDetailPage({ params }: { params: Promise<{ id: s
             />
           </div>
           <p style={{ fontSize: 11, color: 'var(--brand-slate)', marginTop: 6 }}>
-            {facility.lat!.toFixed(5)}, {facility.lng!.toFixed(5)} · <a href={`https://www.openstreetmap.org/?mlat=${facility.lat}&mlon=${facility.lng}&zoom=15`} target="_blank" rel="noreferrer" style={{ color: 'var(--brand-sage)' }}>Ouvrir dans OpenStreetMap</a>
+            {Number(facility.lat).toFixed(5)}, {Number(facility.lng).toFixed(5)} · <a href={`https://www.openstreetmap.org/?mlat=${facility.lat}&mlon=${facility.lng}&zoom=15`} target="_blank" rel="noreferrer" style={{ color: 'var(--brand-sage)' }}>Ouvrir dans OpenStreetMap</a>
           </p>
         </section>
       )}

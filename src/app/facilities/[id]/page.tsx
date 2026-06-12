@@ -3,9 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { use } from 'react';
+import dynamic from 'next/dynamic';
 import { Package, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import styles from './page.module.css';
+
+const FacilityMiniMap = dynamic(() => import('@/components/FacilityMiniMap'), { ssr: false });
 
 interface Facility {
   id: string;
@@ -252,6 +255,25 @@ export default function FacilityDetailPage({ params }: { params: Promise<{ id: s
           </div>
         </section>
       </div>
+
+      {hasGps && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Position sur la carte</h3>
+          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
+            <FacilityMiniMap
+              lat={facility.lat!}
+              lng={facility.lng!}
+              name={facility.name}
+              region={facility.region}
+              status={facility.status}
+              height="320px"
+            />
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--brand-slate)', marginTop: 6 }}>
+            {facility.lat!.toFixed(5)}, {facility.lng!.toFixed(5)} · <a href={`https://www.openstreetmap.org/?mlat=${facility.lat}&mlon=${facility.lng}&zoom=15`} target="_blank" rel="noreferrer" style={{ color: 'var(--brand-sage)' }}>Ouvrir dans OpenStreetMap</a>
+          </p>
+        </section>
+      )}
 
       <section className={styles.section} style={{ marginTop: 8 }}>
         <h3 className={styles.sectionTitle}>Zones de stockage</h3>

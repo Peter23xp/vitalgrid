@@ -12,6 +12,7 @@ export type StockPoint = {
   lng: number;
   stock: number;
   status: 'critical' | 'warning' | 'ok';
+  orgName?: string;
 };
 
 const STATUS_COLOR: Record<StockPoint['status'], string> = {
@@ -86,6 +87,9 @@ export default function StockMap({
             <Popup>
               <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, minWidth: 160 }}>
                 <p style={{ fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>{p.name}</p>
+                {p.orgName && (
+                  <p style={{ color: '#059669', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>{p.orgName}</p>
+                )}
                 <p style={{ color: STATUS_COLOR[p.status], fontWeight: 600 }}>
                   {p.stock} {resourceLabel}
                 </p>

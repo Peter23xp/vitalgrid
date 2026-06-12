@@ -12,7 +12,7 @@ export default function FacilitiesMapPage() {
           <Link href="/dashboard" className={styles.backLink}>← Dashboard</Link>
           <span className={styles.brand}>VitalGrid</span>
           <span className={styles.separator}>|</span>
-          <h1 className={styles.title}>Carte des établissements</h1>
+          <h1 className={styles.title}>Carte régionale — tous les établissements</h1>
         </div>
         <Link href="/facilities" className={styles.viewToggle}>
           <List size={15} />

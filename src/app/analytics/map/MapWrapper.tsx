@@ -23,6 +23,7 @@ interface ApiFacility {
   lat: number | null;
   lng: number | null;
   status: string;
+  org_name?: string;
 }
 
 export default function StockMapWrapper() {
@@ -30,21 +31,22 @@ export default function StockMapWrapper() {
   const [loading, setLoading]  = useState(true);
 
   useEffect(() => {
-    fetch('/api/facilities?limit=200', { credentials: 'same-origin' })
+    fetch('/api/facilities/regional?limit=200', { credentials: 'same-origin' })
       .then((r) => r.json())
       .then((res) => {
         const data: ApiFacility[] = res.data ?? [];
         const mapped: StockPoint[] = data
           .filter((f) => f.lat != null && f.lng != null && isFinite(Number(f.lat)) && isFinite(Number(f.lng)))
           .map((f) => ({
-            id:     f.id,
-            name:   f.name,
-            lat:    Number(f.lat),
-            lng:    Number(f.lng),
-            stock:  0,
-            status: f.status === 'critical' ? 'critical'
-                  : f.status === 'warning'  ? 'warning'
-                  : 'ok',
+            id:      f.id,
+            name:    f.name,
+            lat:     Number(f.lat),
+            lng:     Number(f.lng),
+            stock:   0,
+            status:  f.status === 'critical' ? 'critical'
+                   : f.status === 'warning'  ? 'warning'
+                   : 'ok',
+            orgName: f.org_name,
           }));
         setPoints(mapped);
       })

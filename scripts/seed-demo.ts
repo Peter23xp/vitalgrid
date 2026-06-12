@@ -1,6 +1,8 @@
 import { DsqlSigner } from '@aws-sdk/dsql-signer';
 import { Client } from 'pg';
 import bcrypt from 'bcryptjs';
+import { DynamoDBClient, CreateTableCommand, DescribeTableCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 const ENDPOINT = process.env.DSQL_CLUSTER_ENDPOINT!;
 const REGION = process.env.DSQL_REGION ?? 'us-east-1';
@@ -358,6 +360,269 @@ async function run() {
 
     console.log(`   ✓ ${alertsData.rowCount} alertes créées`);
 
+    // ── Scénario vidéo ─────────────────────────────────────────────────────
+    // Comptes fixes, Sang O- CRITIQUE à Goma, surplus à Kinshasa,
+    // transfert URGENTE pré-configuré, alerte critique, données IoT DynamoDB.
+    console.log('\n🎬 Scénario vidéo — comptes et données fixes...');
+
+    const VIDEO_ORG_SLUG = 'msf-congo';
+    const TRANSFER_REF   = 'DEMO-TR-VIDEO-001';
+    const DDB_REGION     = process.env.DYNAMODB_REGION         ?? 'us-east-1';
+    const DDB_TABLE      = process.env.DYNAMODB_TABLE_COLD_CHAIN ?? 'cold_chain_events';
+
+    // Récupérer l'org MSF Congo créée plus haut
+    const orgVideoR = await client.query(
+      `SELECT id FROM organizations WHERE slug = $1`, [VIDEO_ORG_SLUG]
+    );
+    if (orgVideoR.rowCount === 0) {
+      console.log('   ⚠ MSF Congo non trouvé — scénario vidéo ignoré');
+    } else {
+      const orgId    = orgVideoR.rows[0].id;
+      const tenantId = orgId;
+      const hash     = await bcrypt.hash('Demo2026!', 12);
+
+      // ── Facilities Goma + Kinshasa (MSF Congo les a déjà créées) ──────────
+      const gomaR = await client.query(
+        `SELECT id FROM facilities WHERE tenant_id=$1 AND name='Centre de Santé Goma'`,
+        [tenantId]
+      );
+      const kinR = await client.query(
+        `SELECT id FROM facilities WHERE tenant_id=$1 AND name='Hôpital Général de Kinshasa'`,
+        [tenantId]
+      );
+      // MSF Congo couvre Nord-Kivu et Kinshasa — les deux facilities sont déjà là
+      const facGomaId = gomaR.rows[0]?.id as string | undefined;
+      const facKinId  = kinR.rows[0]?.id  as string | undefined;
+
+      // ── 4 comptes vidéo fixes ──────────────────────────────────────────────
+      const adminVideoR = await client.query(`
+        INSERT INTO users (tenant_id, org_id, email, name, role, password_hash, status)
+        VALUES ($1,$2,'demo.admin@vitalgrid.io','Admin Démo VitalGrid','super_admin',$3,'active')
+        ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, facility_id=NULL
+        RETURNING id
+      `, [tenantId, orgId, hash]);
+      const adminVideoId = adminVideoR.rows[0].id as string;
+
+      await client.query(`
+        INSERT INTO users (tenant_id, org_id, email, name, role, password_hash, status)
+        VALUES ($1,$2,'demo.ngo@vitalgrid.io','Sophie K. — Coordinatrice Régionale','ngo_coordinator',$3,'active')
+        ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, facility_id=NULL
+      `, [tenantId, orgId, hash]);
+
+      if (facKinId) {
+        await client.query(`
+          INSERT INTO users (tenant_id, org_id, facility_id, email, name, role, password_hash, status)
+          VALUES ($1,$2,$3,'demo.manager@vitalgrid.io','Dr. Beatrice Ngozi — Kinshasa','facility_manager',$4,'active')
+          ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, facility_id=EXCLUDED.facility_id
+        `, [tenantId, orgId, facKinId, hash]);
+      }
+
+      if (facGomaId) {
+        await client.query(`
+          INSERT INTO users (tenant_id, org_id, facility_id, email, name, role, password_hash, status)
+          VALUES ($1,$2,$3,'demo.field@vitalgrid.io','Amani Kiza — Agent Terrain Goma','field_agent',$4,'active')
+          ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, facility_id=EXCLUDED.facility_id
+        `, [tenantId, orgId, facGomaId, hash]);
+      }
+
+      console.log('   ✓ demo.admin@vitalgrid.io     → super_admin');
+      console.log('   ✓ demo.ngo@vitalgrid.io       → ngo_coordinator');
+      console.log('   ✓ demo.manager@vitalgrid.io   → facility_manager @ Kinshasa');
+      console.log('   ✓ demo.field@vitalgrid.io     → field_agent @ Goma');
+
+      // ── Sang O- CRITIQUE à Goma (4 poches) ───────────────────────────────
+      if (facGomaId) {
+        const sangGomaR = await client.query(`
+          INSERT INTO resources
+            (tenant_id, facility_id, name, dci, category, unit_of_measure,
+             total_quantity, alert_threshold, zone, location)
+          VALUES ($1,$2,'Sang O- (Poches)','Sang total groupe O Rhésus négatif',
+                  'injectable','poche', 4, 10, 'cold', 'Banque de sang')
+          ON CONFLICT DO NOTHING
+          RETURNING id
+        `, [tenantId, facGomaId]);
+
+        let sangGomaId: string | undefined;
+        if (sangGomaR.rowCount === 0) {
+          const ex = await client.query(
+            `SELECT id FROM resources WHERE tenant_id=$1 AND facility_id=$2 AND name='Sang O- (Poches)'`,
+            [tenantId, facGomaId]
+          );
+          sangGomaId = ex.rows[0]?.id;
+          if (sangGomaId) await client.query(
+            `UPDATE resources SET total_quantity=4, alert_threshold=10 WHERE id=$1`,
+            [sangGomaId]
+          );
+        } else {
+          sangGomaId = sangGomaR.rows[0].id;
+        }
+        console.log('   ✓ Sang O- Goma : 4 poches CRITIQUE (seuil 10)');
+
+        if (sangGomaId) {
+          // Lot
+          await client.query(`
+            INSERT INTO batches (tenant_id, resource_id, batch_number, quantity, expiry_date, supplier)
+            VALUES ($1,$2,'LOT-SANG-GOMA-2024-047',4,'2026-09-15','CROS Congo')
+            ON CONFLICT DO NOTHING
+          `, [tenantId, sangGomaId]);
+
+          // Mouvement initial
+          await client.query(`
+            INSERT INTO inventory_movements (tenant_id, resource_id, delta, reason, user_id, location)
+            VALUES ($1,$2,4,'Stock initial démo',$3,'Banque de sang')
+          `, [tenantId, sangGomaId, adminVideoId]).catch(() => {});
+
+          // Alerte critique
+          await client.query(`
+            INSERT INTO alerts
+              (tenant_id, facility_id, resource_id, alert_type, severity, title, description)
+            VALUES ($1,$2,$3,'stock_bas','critical',
+              'CRITIQUE — Sang O- : 4 poches restantes',
+              'Stock à 4 poches (seuil : 10). Risque de rupture imminente. Transfert urgent requis.')
+            ON CONFLICT DO NOTHING
+          `, [tenantId, facGomaId, sangGomaId]);
+          console.log('   ✓ Alerte critique Sang O- @ Goma créée');
+
+          // ── Sang O- SURPLUS à Kinshasa (23 poches) ───────────────────────
+          if (facKinId) {
+            const sangKinR = await client.query(`
+              INSERT INTO resources
+                (tenant_id, facility_id, name, dci, category, unit_of_measure,
+                 total_quantity, alert_threshold, zone, location)
+              VALUES ($1,$2,'Sang O- (Poches)','Sang total groupe O Rhésus négatif',
+                      'injectable','poche', 23, 8, 'cold', 'Banque de sang')
+              ON CONFLICT DO NOTHING
+              RETURNING id
+            `, [tenantId, facKinId]);
+
+            let sangKinId: string | undefined;
+            if (sangKinR.rowCount === 0) {
+              const ex = await client.query(
+                `SELECT id FROM resources WHERE tenant_id=$1 AND facility_id=$2 AND name='Sang O- (Poches)'`,
+                [tenantId, facKinId]
+              );
+              sangKinId = ex.rows[0]?.id;
+              if (sangKinId) await client.query(
+                `UPDATE resources SET total_quantity=23, alert_threshold=8 WHERE id=$1`,
+                [sangKinId]
+              );
+            } else {
+              sangKinId = sangKinR.rows[0].id;
+            }
+            console.log('   ✓ Sang O- Kinshasa : 23 poches (surplus)');
+
+            if (sangKinId) {
+              await client.query(`
+                INSERT INTO batches (tenant_id, resource_id, batch_number, quantity, expiry_date, supplier)
+                VALUES
+                  ($1,$2,'LOT-SANG-KIN-2024-112',15,'2026-11-20','CROS Congo'),
+                  ($1,$2,'LOT-SANG-KIN-2024-098', 8,'2026-10-05','CROS Congo')
+                ON CONFLICT DO NOTHING
+              `, [tenantId, sangKinId]);
+
+              // Transfert URGENTE pré-configuré (pending — à approuver en direct)
+              await client.query(`
+                INSERT INTO transfers
+                  (tenant_id, ref, resource_id, quantity,
+                   requesting_facility_id, source_facility_id,
+                   status, priority, motif)
+                VALUES ($1,$2,$3, 8, $4,$5,'pending','URGENTE',
+                        'Rupture imminente Sang O- — patient en attente de transfusion')
+                ON CONFLICT DO NOTHING
+              `, [tenantId, TRANSFER_REF, sangGomaId, facGomaId, facKinId]);
+              console.log(`   ✓ Transfert ${TRANSFER_REF} créé (pending, 8 poches, URGENTE)`);
+            }
+          }
+        }
+      }
+
+      // ── Données IoT DynamoDB ──────────────────────────────────────────────
+      console.log('\n📡 DynamoDB — Données IoT chaîne du froid');
+      try {
+        const ddb = new DynamoDBClient({
+          region: DDB_REGION,
+          credentials: {
+            accessKeyId:     process.env.AWS_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+          },
+        });
+        const doc = DynamoDBDocumentClient.from(ddb);
+
+        try {
+          await ddb.send(new CreateTableCommand({
+            TableName: DDB_TABLE,
+            AttributeDefinitions: [
+              { AttributeName: 'transferId', AttributeType: 'S' },
+              { AttributeName: 'timestamp',  AttributeType: 'S' },
+            ],
+            KeySchema: [
+              { AttributeName: 'transferId', KeyType: 'HASH'  },
+              { AttributeName: 'timestamp',  KeyType: 'RANGE' },
+            ],
+            BillingMode: 'PAY_PER_REQUEST',
+          }));
+          console.log('   ✓ Table DynamoDB créée');
+        } catch (e: unknown) {
+          if ((e as { name?: string }).name === 'ResourceInUseException') {
+            console.log('   ℹ Table DynamoDB déjà existante');
+          } else { throw e; }
+        }
+
+        for (let i = 0; i < 15; i++) {
+          const d = await ddb.send(new DescribeTableCommand({ TableName: DDB_TABLE }));
+          if (d.Table?.TableStatus === 'ACTIVE') break;
+          await new Promise(r => setTimeout(r, 2000));
+        }
+
+        // Lectures IoT sur 2h avec un incident à 8.4°C
+        const now = Date.now();
+        const readings = [
+          { offset: 120, celsius: 4.2, isAlert: false },
+          { offset: 115, celsius: 4.0, isAlert: false },
+          { offset: 110, celsius: 3.8, isAlert: false },
+          { offset: 105, celsius: 4.1, isAlert: false },
+          { offset: 100, celsius: 4.3, isAlert: false },
+          { offset:  95, celsius: 3.9, isAlert: false },
+          { offset:  90, celsius: 4.5, isAlert: false },
+          { offset:  85, celsius: 4.2, isAlert: false },
+          { offset:  80, celsius: 5.1, isAlert: false },
+          { offset:  75, celsius: 6.3, isAlert: false },
+          { offset:  70, celsius: 7.8, isAlert: true  },
+          { offset:  65, celsius: 8.4, isAlert: true  },
+          { offset:  60, celsius: 8.1, isAlert: true  },
+          { offset:  55, celsius: 7.2, isAlert: true  },
+          { offset:  50, celsius: 6.1, isAlert: false },
+          { offset:  45, celsius: 5.4, isAlert: false },
+          { offset:  40, celsius: 4.8, isAlert: false },
+          { offset:  35, celsius: 4.3, isAlert: false },
+          { offset:  30, celsius: 3.9, isAlert: false },
+          { offset:  25, celsius: 4.1, isAlert: false },
+          { offset:  20, celsius: 4.0, isAlert: false },
+          { offset:  15, celsius: 3.8, isAlert: false },
+          { offset:  10, celsius: 4.2, isAlert: false },
+          { offset:   5, celsius: 4.1, isAlert: false },
+          { offset:   0, celsius: 3.9, isAlert: false },
+        ];
+
+        for (const r of readings) {
+          await doc.send(new PutCommand({
+            TableName: DDB_TABLE,
+            Item: {
+              transferId: TRANSFER_REF,
+              timestamp:  new Date(now - r.offset * 60 * 1000).toISOString(),
+              celsius:    r.celsius,
+              deviceId:   'IoT-Sensor-DEMO-C77',
+              isAlert:    r.isAlert,
+            },
+          }));
+        }
+        console.log(`   ✓ ${readings.length} lectures IoT insérées (transferId: ${TRANSFER_REF})`);
+      } catch (e) {
+        console.warn('   ⚠ DynamoDB ignoré (vérifier AWS_ACCESS_KEY_ID):', (e as Error).message);
+      }
+    }
+    // ── Fin scénario vidéo ─────────────────────────────────────────────────
+
     await client.end();
 
     console.log('\n✅ Données de démo créées avec succès!\n');
@@ -372,6 +637,12 @@ async function run() {
     console.log('   • admin.ministry-of-health-uganda@vitalgrid.io');
     console.log('   • admin.ministry-of-health-tanzania@vitalgrid.io');
     console.log('   • + managers pour chaque établissement\n');
+    console.log('🎬 Comptes vidéo (mot de passe: Demo2026!):');
+    console.log('   • demo.field@vitalgrid.io     → field_agent    @ Goma (Sang O- CRITIQUE : 4)');
+    console.log('   • demo.manager@vitalgrid.io   → facility_manager @ Kinshasa (surplus : 23)');
+    console.log('   • demo.ngo@vitalgrid.io       → ngo_coordinator (carte régionale)');
+    console.log('   • demo.admin@vitalgrid.io     → super_admin\n');
+    console.log(`   Chaîne du froid : /alerts/cold-chain?transferId=DEMO-TR-VIDEO-001`);
     console.log('🌐 Connecte-toi sur http://localhost:3000/login\n');
 
   } catch (error) {

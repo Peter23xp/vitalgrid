@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
-import { Share2, History } from 'lucide-react';
+import { Share2, History, Check } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import styles from './page.module.css';
 
@@ -23,6 +23,27 @@ export default function TransferDetailPage({ params }: { params: Promise<{ id: s
   const { id } = use(params);
   const [transfer, setTransfer] = useState<Transfer | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = useCallback(async () => {
+    const url = window.location.href;
+    const title = transfer ? `Transfert ${transfer.ref}` : 'Transfert VitalGrid';
+    const text = transfer
+      ? `Transfert ${transfer.ref} — ${transfer.quantity} unités — ${transfer.status.toUpperCase()}`
+      : 'Transfert VitalGrid';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch {
+        // user cancelled — do nothing
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [transfer]);
 
   useEffect(() => {
     apiFetch<Transfer>(`/api/transfers/${id}`)
@@ -38,8 +59,13 @@ export default function TransferDetailPage({ params }: { params: Promise<{ id: s
           <Link href="/transfers" className={styles.backLink}>← Transferts</Link>
           <h1 className={styles.title}>{transfer ? `TRANSFERT ${transfer.ref}` : 'TRANSFERT'}</h1>
         </div>
-        <button className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Share2 size={14} />Partager
+        <button
+          className="btn-outline"
+          style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          onClick={handleShare}
+        >
+          {copied ? <Check size={14} /> : <Share2 size={14} />}
+          {copied ? 'Lien copié !' : 'Partager'}
         </button>
       </header>
 

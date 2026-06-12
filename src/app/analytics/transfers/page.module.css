@@ -202,3 +202,29 @@
   height: auto;
   display: block;
 }
+
+.row:hover td {
+  background: #F8FAFC;
+}
+
+.select {
+  width: auto;
+  min-width: 160px;
+  height: 36px;
+  cursor: pointer;
+}
+
+.actionLink {
+  font-size: 12px;
+  color: var(--brand-navy);
+  font-weight: 500;
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.actionLink:hover {
+  background: var(--bg-hover);
+}

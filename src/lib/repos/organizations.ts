@@ -22,6 +22,26 @@ export async function getOrganizationDetail(id: string) {
   return { org, facilities, users };
 }
 
+export async function updateOrganization(id: string, data: {
+  name?: string; type?: string; country_code?: string;
+}): Promise<Organization | null> {
+  const fields: string[] = [];
+  const vals: unknown[]  = [];
+  let i = 1;
+  if (data.name)         { fields.push(`name = $${i++}`);         vals.push(data.name); }
+  if (data.type)         { fields.push(`type = $${i++}`);         vals.push(data.type); }
+  if (data.country_code) { fields.push(`country_code = $${i++}`); vals.push(data.country_code); }
+  if (fields.length === 0) return queryOne<Organization>('SELECT * FROM organizations WHERE id = $1', [id]);
+  vals.push(id);
+  return transact(async (client) => {
+    const res = await client.query<Organization>(
+      `UPDATE organizations SET ${fields.join(', ')} WHERE id = $${i} RETURNING *`,
+      vals
+    );
+    return res.rows[0] ?? null;
+  });
+}
+
 export async function createOrganization(data: {
   name: string; type: string; country_code: string; regions?: string[];
 }): Promise<Organization> {

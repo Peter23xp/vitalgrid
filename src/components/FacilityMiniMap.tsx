@@ -55,7 +55,7 @@ export default function FacilityMiniMap({ lat, lng, name, region, status, height
             <p style={{ fontWeight: 700, marginBottom: 4, color: '#0F172A' }}>{name}</p>
             {region && <p style={{ color: '#64748B', fontSize: 12 }}>{region}</p>}
             <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
-              {lat.toFixed(4)}, {lng.toFixed(4)}
+              {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}
             </p>
           </div>
         </Popup>

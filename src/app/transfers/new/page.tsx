@@ -208,7 +208,7 @@ function NewTransferForm() {
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Niveau d&apos;urgence *</label>
-            <select className={`input-field ${styles.select}`} required defaultValue="normal" value={urgency} onChange={(e) => setUrgency(e.target.value)}>
+            <select className={`input-field ${styles.select}`} required value={urgency} onChange={(e) => setUrgency(e.target.value)}>
               <option value="critique">Critique (Livraison &lt; 4h)</option>
               <option value="eleve">Élevé (Livraison &lt; 24h)</option>
               <option value="normal">Normal (24-72h)</option>

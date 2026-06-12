@@ -35,12 +35,12 @@ export default function StockMapWrapper() {
       .then((res) => {
         const data: ApiFacility[] = res.data ?? [];
         const mapped: StockPoint[] = data
-          .filter((f) => f.lat != null && f.lng != null)
+          .filter((f) => f.lat != null && f.lng != null && isFinite(Number(f.lat)) && isFinite(Number(f.lng)))
           .map((f) => ({
             id:     f.id,
             name:   f.name,
-            lat:    f.lat as number,
-            lng:    f.lng as number,
+            lat:    Number(f.lat),
+            lng:    Number(f.lng),
             stock:  0,
             status: f.status === 'critical' ? 'critical'
                   : f.status === 'warning'  ? 'warning'

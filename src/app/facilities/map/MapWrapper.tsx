@@ -35,13 +35,13 @@ export default function MapWrapper() {
       .then((res) => {
         const data: ApiFacility[] = res.data ?? [];
         const mapped: FacilityPin[] = data
-          .filter((f) => f.lat != null && f.lng != null)
+          .filter((f) => f.lat != null && f.lng != null && isFinite(Number(f.lat)) && isFinite(Number(f.lng)))
           .map((f) => ({
             id:       f.id,
             name:     f.name,
             region:   f.region ?? '',
-            lat:      f.lat as number,
-            lng:      f.lng as number,
+            lat:      Number(f.lat),
+            lng:      Number(f.lng),
             status:   (['critical', 'warning', 'ok', 'offline'].includes(f.status)
                         ? f.status : 'ok') as FacilityPin['status'],
           }));

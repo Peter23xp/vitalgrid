@@ -21,7 +21,11 @@ const STATUS_COLOR: Record<StockPoint['status'], string> = {
 
 function RecenterMap({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
-  useEffect(() => { map.setView(center, zoom); }, [map, center, zoom]);
+  useEffect(() => {
+    if (isFinite(center[0]) && isFinite(center[1])) {
+      map.setView(center, zoom);
+    }
+  }, [map, center, zoom]);
   return null;
 }
 

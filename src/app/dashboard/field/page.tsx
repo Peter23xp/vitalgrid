@@ -7,7 +7,21 @@ import { apiFetch } from '@/lib/api-client';
 import styles from './page.module.css';
 
 interface Alert { id: string; title: string; severity: string; description: string | null; resource_id: string | null; }
-interface Transfer { id: string; ref: string; quantity: number; status: string; requesting_facility_id: string; }
+interface Transfer {
+  id: string; ref: string; quantity: number; status: string;
+  requesting_facility_id: string; source_facility_name?: string | null;
+  resource_name?: string | null;
+}
+
+const STATUS_LABEL: Record<string, { label: string; badge: string }> = {
+  pending:   { label: 'En attente d\'approbation', badge: 'warning' },
+  confirmed: { label: 'Approuvé — préparation', badge: 'info' },
+  in_transit:{ label: 'En transit', badge: 'info' },
+  delivered: { label: 'Livré — à réceptionner', badge: 'warning' },
+  completed: { label: 'Complété', badge: 'success' },
+  cancelled: { label: 'Annulé', badge: 'info' },
+  incident:  { label: 'Incident', badge: 'critical' },
+};
 
 export default function FieldAgentDashboard() {
   const [facilityId, setFacilityId] = useState<string | null>(null);
@@ -23,11 +37,17 @@ export default function FieldAgentDashboard() {
   }, []);
 
   useEffect(() => {
-    if (facilityId === null) return; // still waiting for /api/auth/me
+    if (facilityId === null) return;
     const fFilter = facilityId ? `&facilityId=${facilityId}` : '';
     Promise.all([
       apiFetch<{ data: Alert[] }>(`/api/alerts?read=false&severity=critical&limit=5${fFilter}`),
-      apiFetch<{ data: Transfer[] }>(`/api/transfers?status=in_transit&limit=5${fFilter}`),
+      // All active transfers WHERE this facility is the requester (mes demandes)
+      apiFetch<{ data: Transfer[] }>(`/api/transfers?limit=10&enrich=1${fFilter}`).then((r) => ({
+        data: (r.data ?? []).filter((t) =>
+          ['pending','confirmed','in_transit','delivered'].includes(t.status) &&
+          t.requesting_facility_id === facilityId
+        ),
+      })),
     ]).then(([a, t]) => { setAlerts(a.data ?? []); setTransfers(t.data ?? []); })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -136,27 +156,42 @@ export default function FieldAgentDashboard() {
         <div className={styles.columnRight}>
           <section className={styles.cardElevated}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Transferts entrants</h2>
-              <Link href="/transfers" className={styles.seeAll}>Voir <ChevronRight size={14} /></Link>
+              <h2 className={styles.sectionTitle}>Mes demandes de transfert</h2>
+              <Link href="/transfers" className={styles.seeAll}>Tout voir <ChevronRight size={14} /></Link>
             </div>
             {loading ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--brand-slate)', fontSize: 13 }}>Chargement...</div>
             ) : transfers.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 20px', color: 'var(--brand-slate)' }}>
                 <ArrowLeftRight size={32} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                <p style={{ fontSize: 13 }}>Aucun transfert en cours</p>
+                <p style={{ fontSize: 13 }}>Aucune demande active</p>
+                <Link href="/transfers/new" className="btn-primary" style={{ display: 'inline-flex', marginTop: 12, padding: '8px 16px', fontSize: 12 }}>
+                  Nouvelle demande
+                </Link>
               </div>
             ) : (
               <div>
-                {transfers.map((t) => (
-                  <div key={t.id} style={{ padding: '12px 20px', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-navy)' }} className="mono">{t.ref}</p>
-                      <p style={{ fontSize: 11, color: 'var(--brand-slate)' }}>{t.quantity} unités</p>
-                    </div>
-                    <span className="badge info">{t.status}</span>
-                  </div>
-                ))}
+                {transfers.map((t) => {
+                  const s = STATUS_LABEL[t.status] ?? { label: t.status, badge: 'info' };
+                  const needsAction = t.status === 'delivered';
+                  return (
+                    <Link key={t.id} href={`/transfers/${t.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderBottom: '1px solid var(--border-light)', textDecoration: 'none' }}>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-navy)' }} className="mono">{t.ref}</p>
+                        <p style={{ fontSize: 11, color: 'var(--brand-slate)', marginTop: 2 }}>
+                          {t.resource_name ?? ''}{t.resource_name ? ' · ' : ''}{t.quantity} unités
+                        </p>
+                        <p style={{ fontSize: 11, color: 'var(--brand-slate)' }}>{s.label}</p>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                        <span className={`badge ${s.badge}`} style={{ fontSize: 10 }}>{t.status.toUpperCase()}</span>
+                        {needsAction && (
+                          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--status-warning)' }}>ACTION REQUISE</span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </section>

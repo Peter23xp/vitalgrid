@@ -544,6 +544,9 @@ async function run() {
               `, [tenantId, sangKinId]);
 
               // Transfert URGENTE pré-configuré (pending — à approuver en direct)
+              // resource_id = sangKinId (stock qui vient de Kinshasa = source)
+              // requesting_facility_id = Goma (qui demande)
+              // source_facility_id = Kinshasa (qui a le surplus)
               await client.query(`
                 INSERT INTO transfers
                   (tenant_id, ref, resource_id, quantity,
@@ -552,7 +555,7 @@ async function run() {
                 VALUES ($1,$2,$3, 8, $4,$5,'pending','URGENTE',
                         'Rupture imminente Sang O- — patient en attente de transfusion')
                 ON CONFLICT DO NOTHING
-              `, [tenantId, TRANSFER_REF, sangGomaId, facGomaId, facKinId]);
+              `, [tenantId, TRANSFER_REF, sangKinId, facGomaId, facKinId]);
               console.log(`   ✓ Transfert ${TRANSFER_REF} créé (pending, 8 poches, URGENTE)`);
             }
           }

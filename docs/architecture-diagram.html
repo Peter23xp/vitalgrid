@@ -56,27 +56,22 @@
   <text x="300" y="220" text-anchor="middle" font-size="10" fill="#9ca3af">token</text>
 
   <!-- Fork from Web/API down to 3 children -->
-  <!-- vertical stem from WebAPI bottom -->
   <line x1="545" y1="268" x2="545" y2="290" stroke="#9ca3af" stroke-width="1.8"/>
-  <!-- horizontal bar -->
-  <line x1="178" y1="290" x2="710" y2="290" stroke="#9ca3af" stroke-width="1.8"/>
-  <!-- drop to MsgQ -->
-  <line x1="178" y1="290" x2="178" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
-  <!-- drop to DSQL -->
-  <line x1="545" y1="290" x2="545" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
-  <!-- drop to DynamoDB -->
-  <line x1="710" y1="290" x2="710" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <line x1="112" y1="290" x2="610" y2="290" stroke="#9ca3af" stroke-width="1.8"/>
+  <line x1="112" y1="290" x2="112" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <line x1="367" y1="290" x2="367" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <line x1="610" y1="290" x2="610" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
   <!-- MsgQ ↓ Worker -->
-  <line x1="178" y1="398" x2="178" y2="448" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <line x1="112" y1="398" x2="112" y2="448" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
   <!-- DSQL --reads--> Worker (dashed) -->
-  <line x1="415" y1="358" x2="272" y2="452"
+  <line x1="290" y1="398" x2="205" y2="448"
         stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah)"/>
-  <text x="332" y="395" text-anchor="middle" font-size="10" fill="#9ca3af">reads</text>
+  <text x="232" y="425" text-anchor="middle" font-size="10" fill="#9ca3af">reads</text>
 
   <!-- Worker → External Services -->
-  <line x1="270" y1="479" x2="588" y2="479" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <line x1="205" y1="479" x2="508" y2="479" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
   <!-- ══════════════════════════════════════════════ -->
   <!--  ROW 1 BOXES                                   -->
@@ -122,26 +117,26 @@
   <!--  ROW 3 BOXES                                   -->
   <!-- ══════════════════════════════════════════════ -->
 
-  <!-- Message Queue (orange) — [88, 312, 180, 86] center x=178 -->
-  <rect x="88" y="312" width="180" height="86" rx="10" fill="#ffedd5" stroke="#fed7aa" stroke-width="1.5"/>
-  <text x="178" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#9a3412">Message Queue</text>
-  <text x="178" y="355" text-anchor="middle" font-size="11" fill="#ea580c">Async jobs</text>
-  <text x="178" y="370" text-anchor="middle" font-size="11" fill="#ea580c">Alert notifications</text>
-  <text x="178" y="385" text-anchor="middle" font-size="11" fill="#ea580c">Email triggers</text>
+  <!-- Message Queue (orange) — x=22, w=180, center x=112 -->
+  <rect x="22" y="312" width="180" height="86" rx="10" fill="#ffedd5" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="112" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#9a3412">Message Queue</text>
+  <text x="112" y="355" text-anchor="middle" font-size="11" fill="#ea580c">Async jobs</text>
+  <text x="112" y="370" text-anchor="middle" font-size="11" fill="#ea580c">Alert notifications</text>
+  <text x="112" y="385" text-anchor="middle" font-size="11" fill="#ea580c">Email triggers</text>
 
-  <!-- Aurora DSQL (sky) — [415, 312, 260, 86] center x=545 -->
-  <rect x="415" y="312" width="260" height="86" rx="10" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1.5"/>
-  <text x="545" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">Aurora DSQL</text>
-  <text x="545" y="355" text-anchor="middle" font-size="11" fill="#3b82f6">Primary data store</text>
-  <text x="545" y="370" text-anchor="middle" font-size="11" fill="#3b82f6">12 tables · ACID · Multi-tenant</text>
-  <text x="545" y="385" text-anchor="middle" font-size="11" fill="#3b82f6">PostgreSQL-compatible · Serverless</text>
+  <!-- Aurora DSQL (sky) — x=237, w=260, center x=367 -->
+  <rect x="237" y="312" width="260" height="86" rx="10" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="367" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">Aurora DSQL</text>
+  <text x="367" y="355" text-anchor="middle" font-size="11" fill="#3b82f6">Primary data store</text>
+  <text x="367" y="370" text-anchor="middle" font-size="11" fill="#3b82f6">12 tables · ACID · Multi-tenant</text>
+  <text x="367" y="385" text-anchor="middle" font-size="11" fill="#3b82f6">PostgreSQL-compatible · Serverless</text>
 
-  <!-- DynamoDB (yellow) — [630, 312, 160, 86] center x=710 -->
-  <rect x="630" y="312" width="160" height="86" rx="10" fill="#fef9c3" stroke="#fde68a" stroke-width="1.5"/>
-  <text x="710" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#713f12">DynamoDB</text>
-  <text x="710" y="355" text-anchor="middle" font-size="11" fill="#a16207">IoT cold-chain events</text>
-  <text x="710" y="370" text-anchor="middle" font-size="11" fill="#a16207">PK: transferId</text>
-  <text x="710" y="385" text-anchor="middle" font-size="11" fill="#a16207">SK: timestamp · °C</text>
+  <!-- DynamoDB (yellow) — x=517, w=160, center x=597... shift right to x=560, center=640 -->
+  <rect x="520" y="312" width="180" height="86" rx="10" fill="#fef9c3" stroke="#fde68a" stroke-width="1.5"/>
+  <text x="610" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#713f12">DynamoDB</text>
+  <text x="610" y="355" text-anchor="middle" font-size="11" fill="#a16207">IoT cold-chain events</text>
+  <text x="610" y="370" text-anchor="middle" font-size="11" fill="#a16207">PK: transferId</text>
+  <text x="610" y="385" text-anchor="middle" font-size="11" fill="#a16207">SK: timestamp · °C</text>
 
   <!-- ══════════════════════════════════════════════ -->
   <!--  ROW 4 BOXES                                   -->
@@ -152,11 +147,11 @@
   <text x="179" y="474" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Worker Service</text>
   <text x="179" y="492" text-anchor="middle" font-size="11" fill="#059669">Background processing</text>
 
-  <!-- External Services (pink) — [588, 448, 202, 62] center x=689 -->
-  <rect x="588" y="448" width="202" height="62" rx="10" fill="#fce7f3" stroke="#fbcfe8" stroke-width="1.5"/>
-  <text x="689" y="468" text-anchor="middle" font-size="14" font-weight="700" fill="#9d174d">External Services</text>
-  <text x="689" y="485" text-anchor="middle" font-size="11" fill="#db2777">SendGrid · Email API</text>
-  <text x="689" y="500" text-anchor="middle" font-size="11" fill="#db2777">OpenStreetMap · Leaflet</text>
+  <!-- External Services (pink) — x=510, w=210, center x=615 -->
+  <rect x="510" y="448" width="210" height="62" rx="10" fill="#fce7f3" stroke="#fbcfe8" stroke-width="1.5"/>
+  <text x="615" y="468" text-anchor="middle" font-size="14" font-weight="700" fill="#9d174d">External Services</text>
+  <text x="615" y="485" text-anchor="middle" font-size="11" fill="#db2777">SendGrid · Email API</text>
+  <text x="615" y="500" text-anchor="middle" font-size="11" fill="#db2777">OpenStreetMap · Leaflet</text>
 
   <!-- ══════════════════════════════════════════════ -->
   <!--  OBSERVABILITY BAR                             -->

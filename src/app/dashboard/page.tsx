@@ -34,7 +34,7 @@ interface Transfer {
 }
 
 export default function FacilityManagerDashboard() {
-  const [facilityId, setFacilityId] = useState<string | null>(null);
+  const [facilityId, setFacilityId] = useState<string>('');
   const [summary, setSummary] = useState<Summary | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -48,24 +48,16 @@ export default function FacilityManagerDashboard() {
     fetch('/api/auth/me', { credentials: 'same-origin' })
       .then((r) => r.json())
       .then((u) => setFacilityId(u.facilityId ?? ''))
-      .catch(() => setFacilityId(''));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
-    // Wait until /api/auth/me has resolved (facilityId is null while pending)
-    if (facilityId === null) return;
 
-    // facilityId may be empty for roles without a fixed facility (super_admin, ngo_coordinator…)
-    // API handles both: scoped by facility when provided, org-wide otherwise
-    const fParam = facilityId && facilityId !== '00000000-0000-0000-0000-000000000001'
-      ? `?facilityId=${facilityId}` : '';
-    const fFilter = facilityId && facilityId !== '00000000-0000-0000-0000-000000000001'
-      ? `&facilityId=${facilityId}` : '';
-
+    // Always load org-wide stats — facility filter would miss cross-tenant data
     Promise.all([
-      apiFetch<Summary>(`/api/dashboard/summary${fParam}`),
-      apiFetch<{ data: Alert[] }>(`/api/alerts?read=false&severity=critical&limit=3${fFilter}`),
-      apiFetch<{ data: Transfer[] }>(`/api/transfers?status=in_transit${fFilter}`),
+      apiFetch<Summary>('/api/dashboard/summary'),
+      apiFetch<{ data: Alert[] }>('/api/alerts?read=false&severity=critical&limit=3'),
+      apiFetch<{ data: Transfer[] }>('/api/transfers?status=in_transit&limit=10'),
     ]).then(([s, a, t]) => {
       setSummary(s);
       setAlerts(a.data ?? []);

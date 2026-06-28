@@ -100,17 +100,64 @@ export async function confirmReceipt(
     const transfer = tf.rows[0];
     if (transfer.status === 'completed') throw new Error('ERR_ALREADY_CONFIRMED');
 
-    await client.query(
-      `UPDATE resources SET total_quantity = total_quantity + $1, updated_at = NOW()
-       WHERE tenant_id = $2 AND id = $3`,
-      [data.received_qty, tenantId, transfer.resource_id]
-    );
+    const destFacilityId = transfer.requesting_facility_id;
 
-    await client.query(
-      `INSERT INTO inventory_movements (tenant_id, resource_id, delta, reason, transfer_id)
-       VALUES ($1,$2,$3,'Réception transfert',$4)`,
-      [tenantId, transfer.resource_id, data.received_qty, id]
+    // Find the resource at the DESTINATION facility (same name/category as source resource)
+    const srcRes = await client.query<{ name: string; dci: string | null; category: string; unit_of_measure: string; alert_threshold: number }>(
+      'SELECT name, dci, category, unit_of_measure, alert_threshold FROM resources WHERE id = $1',
+      [transfer.resource_id]
     );
+    const src = srcRes.rows[0];
+
+    // Look for matching resource at destination
+    let destResId: string | null = null;
+    if (src) {
+      const destRes = await client.query<{ id: string }>(
+        `SELECT id FROM resources WHERE tenant_id = $1 AND facility_id = $2 AND name = $3 LIMIT 1`,
+        [tenantId, destFacilityId, src.name]
+      );
+      if (destRes.rows[0]) {
+        destResId = destRes.rows[0].id;
+        // Increase stock at destination
+        await client.query(
+          `UPDATE resources SET total_quantity = total_quantity + $1, updated_at = NOW() WHERE id = $2`,
+          [data.received_qty, destResId]
+        );
+      } else {
+        // Resource doesn't exist at destination yet — create it
+        const newRes = await client.query<{ id: string }>(
+          `INSERT INTO resources (tenant_id, facility_id, name, dci, category, unit_of_measure, total_quantity, alert_threshold, zone, location)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'cold','Reçu par transfert') RETURNING id`,
+          [tenantId, destFacilityId, src.name, src.dci, src.category, src.unit_of_measure,
+           data.received_qty, src.alert_threshold]
+        );
+        destResId = newRes.rows[0].id;
+      }
+    }
+
+    // Log inventory movement at destination
+    if (destResId) {
+      await client.query(
+        `INSERT INTO inventory_movements (tenant_id, resource_id, delta, reason, transfer_id)
+         VALUES ($1,$2,$3,'Réception transfert',$4)`,
+        [tenantId, destResId, data.received_qty, id]
+      );
+    }
+
+    // Resolve alerts for this resource at the destination facility
+    if (destResId) {
+      await client.query(
+        `UPDATE alerts SET is_read = true, resolved_at = NOW()
+         WHERE tenant_id = $1 AND facility_id = $2 AND resource_id = $3 AND is_read = false`,
+        [tenantId, destFacilityId, destResId]
+      );
+      // Also resolve by resource name if alert was linked to source resource_id
+      await client.query(
+        `UPDATE alerts SET is_read = true, resolved_at = NOW()
+         WHERE tenant_id = $1 AND facility_id = $2 AND resource_id = $3 AND is_read = false`,
+        [tenantId, destFacilityId, transfer.resource_id]
+      );
+    }
 
     const updated = await client.query<Transfer>(
       `UPDATE transfers SET

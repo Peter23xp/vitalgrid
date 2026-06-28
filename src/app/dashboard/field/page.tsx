@@ -10,7 +10,7 @@ interface Alert { id: string; title: string; severity: string; description: stri
 interface Transfer { id: string; ref: string; quantity: number; status: string; requesting_facility_id: string; }
 
 export default function FieldAgentDashboard() {
-  const [facilityId, setFacilityId] = useState('');
+  const [facilityId, setFacilityId] = useState<string | null>(null);
   const [alerts, setAlerts]         = useState<Alert[]>([]);
   const [transfers, setTransfers]   = useState<Transfer[]>([]);
   const [loading, setLoading]       = useState(true);
@@ -18,16 +18,17 @@ export default function FieldAgentDashboard() {
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'same-origin' })
       .then((r) => r.json())
-      .then((u) => { if (u.facilityId) setFacilityId(u.facilityId); else setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((u) => setFacilityId(u.facilityId ?? ''))
+      .catch(() => setFacilityId(''));
   }, []);
 
   useEffect(() => {
-    if (!facilityId) return;
+    if (facilityId === null) return; // still waiting for /api/auth/me
+    const fFilter = facilityId ? `&facilityId=${facilityId}` : '';
     Promise.all([
-      apiFetch<{ data: Alert[] }>(`/api/alerts?facilityId=${facilityId}&read=false&severity=critical&limit=5`),
-      apiFetch<{ data: Transfer[] }>(`/api/transfers?facilityId=${facilityId}&status=in_transit&limit=5`),
-    ]).then(([a, t]) => { setAlerts(a.data); setTransfers(t.data); })
+      apiFetch<{ data: Alert[] }>(`/api/alerts?read=false&severity=critical&limit=5${fFilter}`),
+      apiFetch<{ data: Transfer[] }>(`/api/transfers?status=in_transit&limit=5${fFilter}`),
+    ]).then(([a, t]) => { setAlerts(a.data ?? []); setTransfers(t.data ?? []); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [facilityId]);

@@ -34,7 +34,14 @@ export default function TransfersPage() {
   useEffect(() => {
     setLoading(true);
     apiFetch<{ data: Transfer[] }>('/api/transfers?limit=100&enrich=1')
-      .then((r) => setTransfers(r.data ?? []))
+      .then((r) => {
+        const data = r.data ?? [];
+        setTransfers(data);
+        // Auto-select "pending" tab if there are pending transfers and none active
+        const hasPending = data.some((t) => STATUS_TAB.pending.includes(t.status));
+        const hasActive  = data.some((t) => STATUS_TAB.active.includes(t.status));
+        if (hasPending && !hasActive) setTab('pending');
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -69,7 +76,16 @@ export default function TransfersPage() {
             className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
             onClick={() => setTab(t)}
           >
-            {t === 'active' ? `En cours (${counts.active})` : t === 'pending' ? `En attente (${counts.pending})` : 'Complétés'}
+            {t === 'active' ? `En cours (${counts.active})` : t === 'pending' ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                En attente
+                {counts.pending > 0 && (
+                  <span style={{ background: 'var(--status-error)', color: '#fff', borderRadius: 10, fontSize: 10, fontWeight: 700, padding: '1px 6px', lineHeight: '16px' }}>
+                    {counts.pending}
+                  </span>
+                )}
+              </span>
+            ) : 'Complétés'}
           </button>
         ))}
       </div>

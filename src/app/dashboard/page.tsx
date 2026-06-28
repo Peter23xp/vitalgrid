@@ -57,7 +57,12 @@ export default function FacilityManagerDashboard() {
     Promise.all([
       apiFetch<Summary>('/api/dashboard/summary'),
       apiFetch<{ data: Alert[] }>('/api/alerts?read=false&severity=critical&limit=3'),
-      apiFetch<{ data: Transfer[] }>('/api/transfers?status=in_transit&limit=10'),
+      // Load pending first, fallback to in_transit — shows what needs action
+      apiFetch<{ data: Transfer[] }>('/api/transfers?limit=10&enrich=1').then((r) => {
+        const data = r.data ?? [];
+        const pending = data.filter((t) => t.status === 'pending');
+        return { data: pending.length > 0 ? pending : data.filter((t) => t.status === 'in_transit') };
+      }),
     ]).then(([s, a, t]) => {
       setSummary(s);
       setAlerts(a.data ?? []);
@@ -145,28 +150,49 @@ export default function FacilityManagerDashboard() {
 
           <section className={styles.cardElevated}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Transferts en cours</h2>
-              <Link href="/transfers" className={styles.seeAll}>Tout voir <ChevronRight size={14} /></Link>
+              <h2 className={styles.sectionTitle}>
+                {transfers.some((t) => t.status === 'pending') ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    À approuver
+                    <span style={{ background: 'var(--status-error)', color: '#fff', borderRadius: 10, fontSize: 10, fontWeight: 700, padding: '1px 7px' }}>
+                      {transfers.filter((t) => t.status === 'pending').length}
+                    </span>
+                  </span>
+                ) : 'Transferts en cours'}
+              </h2>
+              <Link href="/transfers?tab=pending" className={styles.seeAll}>Tout voir <ChevronRight size={14} /></Link>
             </div>
             {loading || transfers.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 20px', color: 'var(--brand-slate)' }}>
                 <ArrowLeftRight size={32} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.35 }} />
-                <p style={{ fontSize: 13 }}>{loading ? 'Chargement...' : 'Aucun transfert en cours'}</p>
+                <p style={{ fontSize: 13 }}>{loading ? 'Chargement...' : 'Aucun transfert en attente'}</p>
               </div>
             ) : (
               <div className={styles.list}>
                 {transfers.map((t) => (
                   <div key={t.id} className={styles.listItem}>
                     <div className={styles.itemInfo}>
-                      <div className={styles.transferDirIcon} style={{ color: 'var(--status-info)' }}>
+                      <div className={styles.transferDirIcon} style={{ color: t.status === 'pending' ? 'var(--status-warning)' : 'var(--status-info)' }}>
                         {t.requesting_facility_id === facilityId ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
                       </div>
                       <div>
                         <p className={styles.itemTitle}><span className="mono">{t.ref}</span></p>
-                        <p className={styles.itemDesc}>{t.quantity} unités</p>
+                        <p className={styles.itemDesc}>
+                          {(t as Transfer & { source_facility_name?: string; requesting_facility_name?: string }).source_facility_name ?? '—'}
+                          {' → '}
+                          {(t as Transfer & { requesting_facility_name?: string }).requesting_facility_name ?? '—'}
+                          {' · '}{t.quantity} unités
+                        </p>
                       </div>
                     </div>
-                    <span className="badge info">{t.status}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span className={`badge ${t.status === 'pending' ? 'warning' : 'info'}`}>{t.status.toUpperCase()}</span>
+                      {t.status === 'pending' && (
+                        <Link href={`/transfers/${t.id}`} className="btn-primary" style={{ fontSize: 11, padding: '4px 10px', height: 28 }}>
+                          Voir →
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

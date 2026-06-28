@@ -141,11 +141,13 @@ export default function TransferDetailPage({ params }: { params: Promise<{ id: s
     setActing(true);
     setActionError('');
     try {
-      const updated = await apiFetch<Transfer>(`/api/transfers/${id}`, {
+      await apiFetch(`/api/transfers/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status, ...extra }),
       });
-      setTransfer(updated);
+      // Re-fetch the enriched GET to keep resource/facility names after status change
+      const fresh = await apiFetch<Transfer>(`/api/transfers/${id}`);
+      setTransfer(fresh);
       setShowTransitForm(false);
     } catch (e: unknown) {
       setActionError((e as Error).message);

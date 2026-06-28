@@ -1,15 +1,30 @@
 import { NextRequest } from 'next/server';
-import { requireTenant } from '@/lib/tenant';
+import { requireSession } from '@/lib/tenant';
+import { query as dbQuery } from '@/lib/db';
 import { listTransfers, createTransfer } from '@/lib/repos/transfers';
 import { apiOk, apiError } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
   try {
-    const tenantId = await requireTenant(req);
+    const session = await requireSession(req);
+    const tenantId = session.tenantId;
     const s = req.nextUrl.searchParams;
+
+    // Always read facilityId fresh from DB (JWT may be stale)
+    const freshUser = await dbQuery<{ facility_id: string | null }>(
+      'SELECT facility_id FROM users WHERE id = $1', [session.userId]
+    );
+    const dbFacilityId = freshUser[0]?.facility_id ?? null;
+
+    // facility_manager and field_agent see only their own facility's transfers
+    // unless an explicit facilityId override is provided
+    const scopedRoles = ['facility_manager', 'field_agent'];
+    const autoFacilityId = scopedRoles.includes(session.role) ? dbFacilityId : null;
+    const facilityId = s.get('facilityId') ?? autoFacilityId ?? undefined;
+
     const result = await listTransfers(tenantId, {
-      facilityId: s.get('facilityId') ?? undefined,
-      status:     s.get('status')     ?? undefined,
+      facilityId: facilityId ?? undefined,
+      status:     s.get('status') ?? undefined,
       page:  Number(s.get('page')  ?? 1),
       limit: Number(s.get('limit') ?? 25),
     });
@@ -55,7 +70,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const tenantId = await requireTenant(req);
+    const session = await requireSession(req);
+    const tenantId = session.tenantId;
     const body = await req.json();
     if (!body.resource_id || !body.quantity || !body.requesting_facility_id) {
       return apiError('Champs requis manquants');

@@ -22,7 +22,29 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const transfer = await getTransfer(session.tenantId, id);
     if (!transfer) return apiError('Transfert introuvable', 404);
-    return apiOk(transfer);
+
+    // Enrich with facility and resource names
+    const [facRows, resRow] = await Promise.all([
+      query<{ id: string; name: string }>(
+        `SELECT id, name FROM facilities WHERE id = ANY($1::uuid[])`,
+        [[transfer.requesting_facility_id, transfer.source_facility_id].filter(Boolean)]
+      ),
+      query<{ id: string; name: string; unit_of_measure: string; category: string }>(
+        `SELECT id, name, unit_of_measure, category FROM resources WHERE id = $1`,
+        [transfer.resource_id]
+      ),
+    ]);
+
+    const facMap = Object.fromEntries(facRows.map(f => [f.id, f.name]));
+
+    return apiOk({
+      ...transfer,
+      requesting_facility_name: facMap[transfer.requesting_facility_id] ?? null,
+      source_facility_name:     transfer.source_facility_id ? (facMap[transfer.source_facility_id] ?? null) : null,
+      resource_name:            resRow[0]?.name ?? null,
+      resource_unit:            resRow[0]?.unit_of_measure ?? null,
+      resource_category:        resRow[0]?.category ?? null,
+    });
   } catch (e: unknown) {
     const err = e as Error;
     if (err.message === 'ERR_UNAUTHENTICATED') return apiError('Non authentifié', 401);

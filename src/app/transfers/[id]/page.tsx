@@ -12,12 +12,16 @@ interface Transfer {
   requesting_facility_id: string; source_facility_id: string | null;
   driver_name: string | null; driver_phone: string | null;
   vehicle_ref: string | null; created_at: string; updated_at: string;
-  _viewer_facility_id?: string | null;
 }
 
-function TransferActions({ transfer, acting, showTransitForm, driverName, driverPhone, vehicleRef,
+interface Me {
+  facilityId: string | null;
+  role: string;
+}
+
+function TransferActions({ transfer, me, acting, showTransitForm, driverName, driverPhone, vehicleRef,
   onSetShowTransitForm, onSetDriverName, onSetDriverPhone, onSetVehicleRef, onAct, transferId }: {
-  transfer: Transfer; acting: boolean; showTransitForm: boolean;
+  transfer: Transfer; me: Me | null; acting: boolean; showTransitForm: boolean;
   driverName: string; driverPhone: string; vehicleRef: string;
   onSetShowTransitForm: (v: boolean) => void;
   onSetDriverName: (v: string) => void;
@@ -26,9 +30,12 @@ function TransferActions({ transfer, acting, showTransitForm, driverName, driver
   onAct: (status: string, extra?: Record<string, string>) => void;
   transferId: string;
 }) {
-  const viewerFac   = transfer._viewer_facility_id ?? null;
-  const isSource    = !viewerFac || viewerFac === transfer.source_facility_id;
-  const isRequester = !viewerFac || viewerFac === transfer.requesting_facility_id;
+  // Roles without a fixed facility (ngo_coordinator, super_admin) can do everything
+  const noFacilityRoles = ['super_admin', 'ngo_coordinator', 'auditor'];
+  const viewerFac = me?.facilityId ?? null;
+  const isOmnipotent = !viewerFac || noFacilityRoles.includes(me?.role ?? '');
+  const isSource    = isOmnipotent || viewerFac === transfer.source_facility_id;
+  const isRequester = isOmnipotent || viewerFac === transfer.requesting_facility_id;
 
   if (transfer.status === 'pending') return (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -114,6 +121,7 @@ const STATUS_BADGE: Record<string, string> = {
 export default function TransferDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [transfer, setTransfer] = useState<Transfer | null>(null);
+  const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [acting, setActing] = useState(false);
@@ -161,9 +169,13 @@ export default function TransferDetailPage({ params }: { params: Promise<{ id: s
   }, [transfer]);
 
   useEffect(() => {
-    apiFetch<Transfer>(`/api/transfers/${id}`)
-      .then(setTransfer)
-      .catch(console.error)
+    Promise.all([
+      apiFetch<Transfer>(`/api/transfers/${id}`),
+      fetch('/api/auth/me', { credentials: 'same-origin' }).then(r => r.json()),
+    ]).then(([t, m]) => {
+      setTransfer(t);
+      setMe({ facilityId: m.facilityId ?? null, role: m.role ?? '' });
+    }).catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -223,6 +235,7 @@ export default function TransferDetailPage({ params }: { params: Promise<{ id: s
 
           <TransferActions
             transfer={transfer}
+            me={me}
             acting={acting}
             showTransitForm={showTransitForm}
             driverName={driverName}

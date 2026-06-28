@@ -22,8 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const transfer = await getTransfer(session.tenantId, id);
     if (!transfer) return apiError('Transfert introuvable', 404);
-    // Inclure le rôle de l'utilisateur courant pour que le client sache quelles actions afficher
-    return apiOk({ ...transfer, _viewer_facility_id: session.facilityId });
+    return apiOk(transfer);
   } catch (e: unknown) {
     const err = e as Error;
     if (err.message === 'ERR_UNAUTHENTICATED') return apiError('Non authentifié', 401);

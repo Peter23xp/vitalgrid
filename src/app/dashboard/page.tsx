@@ -79,34 +79,34 @@ export default function FacilityManagerDashboard() {
       </header>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.card}>
+        <Link href="/inventory" className={styles.card} style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className={styles.cardIcon} style={{ background: 'rgba(5,150,105,0.1)', color: 'var(--brand-sage)' }}>
             <Package size={18} />
           </div>
           <div className={styles.metricValue}>{loading ? '--' : (summary?.totalResources ?? '--')}</div>
           <p className={styles.metricLabel}>Ressources en stock</p>
-        </div>
-        <div className={styles.card}>
+        </Link>
+        <Link href="/alerts?severity=critical" className={styles.card} style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className={styles.cardIcon} style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--status-error)' }}>
             <AlertTriangle size={18} />
           </div>
           <div className={styles.metricValue}>{loading ? '--' : (summary?.criticalAlerts ?? '--')}</div>
           <p className={styles.metricLabel}>Alertes critiques</p>
-        </div>
-        <div className={styles.card}>
+        </Link>
+        <Link href="/transfers" className={styles.card} style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className={styles.cardIcon} style={{ background: 'rgba(14,165,233,0.1)', color: 'var(--status-info)' }}>
             <ArrowLeftRight size={18} />
           </div>
           <div className={styles.metricValue}>{loading ? '--' : (summary?.activeTransfers ?? '--')}</div>
           <p className={styles.metricLabel}>Transferts en cours</p>
-        </div>
-        <div className={styles.card}>
+        </Link>
+        <Link href="/inventory/expiry" className={styles.card} style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className={styles.cardIcon} style={{ background: 'rgba(234,179,8,0.1)', color: 'var(--status-warning)' }}>
             <Timer size={18} />
           </div>
           <div className={styles.metricValue}>{loading ? '--' : (summary?.expiringIn7Days ?? '--')}</div>
           <p className={styles.metricLabel}>Expirent dans 7 jours</p>
-        </div>
+        </Link>
       </section>
 
       <div className={styles.mainGrid}>

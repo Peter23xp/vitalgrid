@@ -381,18 +381,45 @@ async function run() {
       const tenantId = orgId;
       const hash     = await bcrypt.hash('Demo2026!', 12);
 
-      // ── Facilities Goma + Kinshasa (MSF Congo les a déjà créées) ──────────
+      // ── Facilities Goma + Kinshasa — chercher dans TOUT le pays CD ──────────
+      // MSF Congo couvre Nord-Kivu (Goma) mais pas forcément Kinshasa.
+      // On cherche dans toutes les orgs du pays pour trouver ces établissements.
       const gomaR = await client.query(
-        `SELECT id FROM facilities WHERE tenant_id=$1 AND name='Centre de Santé Goma'`,
-        [tenantId]
+        `SELECT f.id FROM facilities f
+         JOIN organizations o ON o.id = f.org_id
+         WHERE o.country_code='CD' AND f.name='Centre de Santé Goma'
+         LIMIT 1`
       );
       const kinR = await client.query(
-        `SELECT id FROM facilities WHERE tenant_id=$1 AND name='Hôpital Général de Kinshasa'`,
-        [tenantId]
+        `SELECT f.id FROM facilities f
+         JOIN organizations o ON o.id = f.org_id
+         WHERE o.country_code='CD' AND f.name='Hôpital Général de Kinshasa'
+         LIMIT 1`
       );
-      // MSF Congo couvre Nord-Kivu et Kinshasa — les deux facilities sont déjà là
-      const facGomaId = gomaR.rows[0]?.id as string | undefined;
-      const facKinId  = kinR.rows[0]?.id  as string | undefined;
+
+      // Créer une facility Goma sous MSF Congo si absente
+      let facGomaId = gomaR.rows[0]?.id as string | undefined;
+      if (!facGomaId) {
+        const newGoma = await client.query(
+          `INSERT INTO facilities (tenant_id, org_id, name, type, country_code, region, lat, lng, bed_capacity, contact_name, contact_phone, status, storage_zones)
+           VALUES ($1,$2,'Centre de Santé Goma','Centre de Santé','CD','Nord-Kivu',-1.6740,29.2249,80,'Contact Goma','+243 000 000','active','[]'::jsonb)
+           RETURNING id`,
+          [tenantId, orgId]
+        );
+        facGomaId = newGoma.rows[0].id;
+      }
+
+      // Créer une facility Kinshasa sous MSF Congo si absente
+      let facKinId = kinR.rows[0]?.id as string | undefined;
+      if (!facKinId) {
+        const newKin = await client.query(
+          `INSERT INTO facilities (tenant_id, org_id, name, type, country_code, region, lat, lng, bed_capacity, contact_name, contact_phone, status, storage_zones)
+           VALUES ($1,$2,'Hôpital Général de Kinshasa','Hôpital','CD','Kinshasa',-4.3276,15.3136,450,'Contact Kinshasa','+243 000 001','active','[]'::jsonb)
+           RETURNING id`,
+          [tenantId, orgId]
+        );
+        facKinId = newKin.rows[0].id;
+      }
 
       // ── 4 comptes vidéo fixes ──────────────────────────────────────────────
       const adminVideoR = await client.query(`

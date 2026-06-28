@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Upload, Plus, Package } from 'lucide-react';
+import { Search, Upload, Plus, Package, Building2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import styles from './page.module.css';
 
@@ -14,7 +14,11 @@ interface Resource {
   alert_threshold: number;
   zone: string | null;
   unit_of_measure: string;
+  facility_id: string;
+  facility_name?: string;
 }
+
+interface Facility { id: string; name: string; }
 
 interface PageResult {
   data: Resource[];
@@ -31,11 +35,33 @@ function getStatusLabel(r: Resource): { label: string; cls: string } {
 
 export default function InventoryPage() {
   const [result, setResult] = useState<PageResult | null>(null);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [myFacilityId, setMyFacilityId] = useState<string | null>(null);
+  const [myRole, setMyRole] = useState('');
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
+  const [facilityFilter, setFacilityFilter] = useState('');
   const [page, setPage] = useState(1);
+
+  // Load user identity and facilities
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(u => {
+        setMyRole(u.role ?? '');
+        setMyFacilityId(u.facilityId ?? null);
+        // Non-managers see only their own facility by default
+        if (u.facilityId && u.role === 'facility_manager') setFacilityFilter('');
+        else if (u.facilityId) setFacilityFilter(u.facilityId);
+      });
+    fetch('/api/facilities?limit=100', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(res => setFacilities(res.data ?? []));
+  }, []);
+
+  const isManager = myRole === 'facility_manager' || myRole === 'super_admin' || myRole === 'ngo_coordinator';
 
   const load = useCallback(() => {
     setLoading(true);
@@ -43,11 +69,12 @@ export default function InventoryPage() {
     if (search) params.set('search', search);
     if (category) params.set('category', category);
     if (status) params.set('status', status);
+    if (facilityFilter) params.set('facilityId', facilityFilter);
     apiFetch<PageResult>(`/api/inventory?${params}`)
       .then(setResult)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [search, category, status, page]);
+  }, [search, category, status, facilityFilter, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -83,12 +110,25 @@ export default function InventoryPage() {
           />
         </div>
         <div className={styles.filterGroup}>
+          {isManager && facilities.length > 0 && (
+            <select className={`input-field ${styles.select}`} value={facilityFilter} onChange={(e) => { setFacilityFilter(e.target.value); setPage(1); }}>
+              <option value="">
+                <Building2 size={13} />Tous les établissements
+              </option>
+              {facilities.map(f => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </select>
+          )}
           <select className={`input-field ${styles.select}`} value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }}>
             <option value="">Catégorie: Tous</option>
-            <option value="sang">Sang</option>
-            <option value="medicaments">Médicaments</option>
-            <option value="vaccins">Vaccins</option>
+            <option value="vaccin">Vaccins</option>
+            <option value="antipaludique">Antipaludiques</option>
+            <option value="antibiotique">Antibiotiques</option>
+            <option value="arv">ARV</option>
+            <option value="injectable">Injectables</option>
             <option value="materiel">Matériel</option>
+            <option value="diagnostic">Diagnostic</option>
           </select>
           <select className={`input-field ${styles.select}`} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
             <option value="">Statut: Tous</option>
@@ -105,14 +145,23 @@ export default function InventoryPage() {
       <div className={styles.tableContainer}>
         <table className={styles.table}>
           <thead>
-            <tr><th>NOM</th><th>CATÉG.</th><th>QTÉ</th><th>SEUIL</th><th>STATUT</th></tr>
+            <tr>
+              <th>NOM</th>
+              {!facilityFilter && isManager && <th>ÉTABLISSEMENT</th>}
+              <th>CATÉG.</th>
+              <th>QTÉ</th>
+              <th>SEUIL</th>
+              <th>STATUT</th>
+            </tr>
           </thead>
           <tbody>
-            {!loading && resources.length === 0 ? (
+            {loading ? (
+              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--brand-slate)', fontSize: 13 }}>Chargement...</td></tr>
+            ) : resources.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '32px 20px', color: 'var(--brand-slate)' }}>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '32px 20px', color: 'var(--brand-slate)' }}>
                   <Package size={28} style={{ margin: '0 auto 10px', display: 'block', opacity: 0.35 }} />
-                  <p style={{ fontSize: 13 }}>Aucune ressource. Commencez par ajouter des articles.</p>
+                  <p style={{ fontSize: 13 }}>Aucune ressource.</p>
                 </td>
               </tr>
             ) : resources.map((r) => {
@@ -120,8 +169,11 @@ export default function InventoryPage() {
               return (
                 <tr key={r.id} className={styles.row}>
                   <td><Link href={`/inventory/${r.id}`} className={styles.resourceName}>{r.name}</Link></td>
+                  {!facilityFilter && isManager && (
+                    <td style={{ fontSize: 12, color: 'var(--brand-slate)' }}>{r.facility_name ?? '—'}</td>
+                  )}
                   <td>{r.category}</td>
-                  <td>{r.total_quantity}</td>
+                  <td><strong>{r.total_quantity}</strong> {r.unit_of_measure}</td>
                   <td>{r.alert_threshold}</td>
                   <td><span className={`badge ${st.cls}`}>{st.label}</span></td>
                 </tr>

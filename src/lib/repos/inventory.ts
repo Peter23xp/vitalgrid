@@ -3,33 +3,37 @@ import type { Resource, Batch, InventoryMovement, PaginatedResponse } from '@/li
 
 export async function listResources(
   tenantId: string,
-  opts: { category?: string; status?: string; zone?: string; search?: string; page?: number; limit?: number }
-): Promise<PaginatedResponse<Resource>> {
+  opts: { category?: string; status?: string; zone?: string; search?: string; facilityId?: string; page?: number; limit?: number }
+): Promise<PaginatedResponse<Resource & { facility_name?: string }>> {
   const page = opts.page ?? 1;
   const limit = opts.limit ?? 25;
   const offset = (page - 1) * limit;
 
-  const conditions: string[] = ['tenant_id = $1'];
+  const conditions: string[] = ['r.tenant_id = $1'];
   const params: unknown[] = [tenantId];
   let i = 2;
 
-  if (opts.category) { conditions.push(`category = $${i++}`); params.push(opts.category); }
-  if (opts.zone)     { conditions.push(`zone = $${i++}`);     params.push(opts.zone); }
-  if (opts.search)   { conditions.push(`(name ILIKE $${i++} OR dci ILIKE $${i++})`); params.push(`%${opts.search}%`, `%${opts.search}%`); }
-  if (opts.status === 'critical') { conditions.push(`total_quantity <= alert_threshold`); }
-  if (opts.status === 'ok')       { conditions.push(`total_quantity > alert_threshold`); }
+  if (opts.facilityId) { conditions.push(`r.facility_id = $${i++}`); params.push(opts.facilityId); }
+  if (opts.category)   { conditions.push(`r.category = $${i++}`);    params.push(opts.category); }
+  if (opts.zone)       { conditions.push(`r.zone = $${i++}`);        params.push(opts.zone); }
+  if (opts.search)     { conditions.push(`(r.name ILIKE $${i++} OR r.dci ILIKE $${i++})`); params.push(`%${opts.search}%`, `%${opts.search}%`); }
+  if (opts.status === 'critical') { conditions.push(`r.total_quantity <= r.alert_threshold`); }
+  if (opts.status === 'ok')       { conditions.push(`r.total_quantity > r.alert_threshold`); }
 
   const where = conditions.join(' AND ');
 
   const [countRow] = await query<{ count: string }>(
-    `SELECT COUNT(*) AS count FROM resources WHERE ${where}`, params
+    `SELECT COUNT(*) AS count FROM resources r WHERE ${where}`, params
   );
   const total = parseInt(countRow?.count ?? '0', 10);
 
   params.push(limit, offset);
-  const data = await query<Resource>(
-    `SELECT * FROM resources WHERE ${where}
-     ORDER BY CASE WHEN total_quantity <= alert_threshold THEN 0 ELSE 1 END, name
+  const data = await query<Resource & { facility_name?: string }>(
+    `SELECT r.*, f.name AS facility_name
+     FROM resources r
+     LEFT JOIN facilities f ON f.id = r.facility_id
+     WHERE ${where}
+     ORDER BY f.name, CASE WHEN r.total_quantity <= r.alert_threshold THEN 0 ELSE 1 END, r.name
      LIMIT $${i} OFFSET $${i + 1}`,
     params
   );

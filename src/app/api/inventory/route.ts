@@ -8,12 +8,13 @@ export async function GET(req: NextRequest) {
     const tenantId = await requireTenant(req);
     const s = req.nextUrl.searchParams;
     const result = await listResources(tenantId, {
-      category: s.get('category') ?? undefined,
-      status:   s.get('status')   ?? undefined,
-      zone:     s.get('zone')     ?? undefined,
-      search:   s.get('search')   ?? undefined,
-      page:     Number(s.get('page')  ?? 1),
-      limit:    Number(s.get('limit') ?? 25),
+      category:   s.get('category')   ?? undefined,
+      status:     s.get('status')     ?? undefined,
+      zone:       s.get('zone')       ?? undefined,
+      search:     s.get('search')     ?? undefined,
+      facilityId: s.get('facilityId') ?? undefined,
+      page:       Number(s.get('page')  ?? 1),
+      limit:      Number(s.get('limit') ?? 25),
     });
     return apiOk(result);
   } catch (e: unknown) {

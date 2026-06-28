@@ -206,6 +206,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const [unreadAlerts, setUnreadAlerts] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!user) return;
+    fetch('/api/alerts?limit=1', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((res) => setUnreadAlerts(res.unreadCount ?? 0))
+      .catch(() => {});
+    // Refresh every 60s
+    const interval = setInterval(() => {
+      fetch('/api/alerts?limit=1', { credentials: 'same-origin' })
+        .then((r) => r.json())
+        .then((res) => setUnreadAlerts(res.unreadCount ?? 0))
+        .catch(() => {});
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const profileHref = user?.role === 'super_admin'
     ? '/dashboard/admin'
@@ -236,8 +253,20 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className={styles.navRight}>
-          <Link href="/alerts" className={styles.notificationBtn} aria-label="Alertes">
+          <Link href="/alerts" className={styles.notificationBtn} aria-label="Alertes" style={{ position: 'relative' }}>
             <Bell size={18} />
+            {unreadAlerts > 0 && (
+              <span style={{
+                position: 'absolute', top: 2, right: 2,
+                minWidth: 16, height: 16, borderRadius: 8,
+                background: 'var(--status-error)', color: '#fff',
+                fontSize: 10, fontWeight: 700, lineHeight: '16px',
+                textAlign: 'center', padding: '0 4px',
+                pointerEvents: 'none',
+              }}>
+                {unreadAlerts > 99 ? '99+' : unreadAlerts}
+              </span>
+            )}
           </Link>
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

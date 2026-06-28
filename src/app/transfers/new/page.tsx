@@ -33,7 +33,8 @@ function NewTransferForm() {
   const [quantity, setQuantity] = useState('');
   const [urgency, setUrgency] = useState('normal');
   const [facilities, setFacilities] = useState<Facility[]>([]);
-  const [selectedFacility, setSelectedFacility] = useState('');
+  const [selectedFacility, setSelectedFacility] = useState(''); // source facility (has the stock)
+  const [myFacilityId, setMyFacilityId] = useState('');         // requesting facility (current user)
   const [transportNotes, setTransportNotes] = useState('');
   const [coldChain, setColdChain] = useState(false);
   const [securedTransport, setSecuredTransport] = useState(false);
@@ -42,7 +43,15 @@ function NewTransferForm() {
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
 
-  // Charger les établissements régionaux (toutes orgs du même pays)
+  // Charger la facility de l'utilisateur connecté (pour requesting_facility_id)
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((u) => { if (u.facilityId) setMyFacilityId(u.facilityId); })
+      .catch(console.error);
+  }, []);
+
+  // Charger les établissements régionaux (toutes orgs du même pays) = source possible
   useEffect(() => {
     fetch('/api/facilities/regional?limit=200', { credentials: 'same-origin' })
       .then((r) => r.json())
@@ -96,7 +105,7 @@ function NewTransferForm() {
         body: JSON.stringify({
           resource_id:             selectedResource.id,
           quantity:                Number(quantity),
-          requesting_facility_id:  selectedFacility,
+          requesting_facility_id:  myFacilityId || selectedFacility,
           source_facility_id:      selectedFacility,
           priority:                urgency.toUpperCase(),
           is_emergency:            urgency === 'critique',

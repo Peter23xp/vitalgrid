@@ -15,6 +15,9 @@ interface Transfer {
   source_facility_id: string | null;
   created_at: string;
   is_emergency: boolean;
+  requesting_facility_name?: string;
+  source_facility_name?: string;
+  resource_name?: string;
 }
 
 const STATUS_TAB: Record<string, string[]> = {
@@ -30,8 +33,8 @@ export default function TransfersPage() {
 
   useEffect(() => {
     setLoading(true);
-    apiFetch<{ data: Transfer[] }>('/api/transfers?limit=50')
-      .then((r) => setTransfers(r.data))
+    apiFetch<{ data: Transfer[] }>('/api/transfers?limit=100&enrich=1')
+      .then((r) => setTransfers(r.data ?? []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -91,7 +94,12 @@ export default function TransfersPage() {
                   <span className={`badge ${BADGE_MAP[t.status] ?? 'info'}`}>{t.status.toUpperCase()}</span>
                 </div>
                 <div className={styles.cardRoute}>
-                  <span className={styles.routeValue}>{t.quantity} unités</span>
+                  <span className={styles.routeValue} style={{ fontSize: 12, color: 'var(--brand-slate)' }}>
+                    {t.source_facility_name ?? t.source_facility_id?.slice(0, 8) ?? '—'}
+                    {' → '}
+                    {t.requesting_facility_name ?? t.requesting_facility_id?.slice(0, 8) ?? '—'}
+                  </span>
+                  <span className={styles.routeValue}>{t.quantity} unités{t.resource_name ? ` · ${t.resource_name}` : ''}</span>
                 </div>
                 <div className={styles.cardActions}>
                   <Link href={`/transfers/${t.id}`} className="btn-secondary" style={{ fontSize: '0.85rem', height: '36px', padding: '0 1rem' }}>

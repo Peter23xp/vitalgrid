@@ -381,23 +381,19 @@ async function run() {
       const tenantId = orgId;
       const hash     = await bcrypt.hash('Demo2026!', 12);
 
-      // ── Facilities Goma + Kinshasa — chercher dans TOUT le pays CD ──────────
-      // MSF Congo couvre Nord-Kivu (Goma) mais pas forcément Kinshasa.
-      // On cherche dans toutes les orgs du pays pour trouver ces établissements.
+      // ── Facilities Goma + Kinshasa — UNIQUEMENT sous MSF Congo (tenantId) ──────
+      // Important : chercher par tenant_id pour éviter de récupérer une facility
+      // d'une autre organisation (Ministère de la Santé, UNICEF, etc.)
       const gomaR = await client.query(
-        `SELECT f.id FROM facilities f
-         JOIN organizations o ON o.id = f.org_id
-         WHERE o.country_code='CD' AND f.name='Centre de Santé Goma'
-         LIMIT 1`
+        `SELECT id FROM facilities WHERE tenant_id=$1 AND name='Centre de Santé Goma' LIMIT 1`,
+        [tenantId]
       );
       const kinR = await client.query(
-        `SELECT f.id FROM facilities f
-         JOIN organizations o ON o.id = f.org_id
-         WHERE o.country_code='CD' AND f.name='Hôpital Général de Kinshasa'
-         LIMIT 1`
+        `SELECT id FROM facilities WHERE tenant_id=$1 AND name='Hôpital Général de Kinshasa' LIMIT 1`,
+        [tenantId]
       );
 
-      // Créer une facility Goma sous MSF Congo si absente
+      // Créer Goma sous MSF Congo si absente
       let facGomaId = gomaR.rows[0]?.id as string | undefined;
       if (!facGomaId) {
         const newGoma = await client.query(
@@ -409,7 +405,7 @@ async function run() {
         facGomaId = newGoma.rows[0].id;
       }
 
-      // Créer une facility Kinshasa sous MSF Congo si absente
+      // Créer Kinshasa sous MSF Congo si absente
       let facKinId = kinR.rows[0]?.id as string | undefined;
       if (!facKinId) {
         const newKin = await client.query(

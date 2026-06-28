@@ -12,6 +12,17 @@ export const metadata: Metadata = {
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
+      <head>
+        {/* Preconnect before font requests — eliminates FOUT delay */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap"
+        />
+        {/* Preload hero background image — eliminates flash on first paint */}
+        <link rel="preload" as="image" href="/assets/Facility Manager.jpg" />
+      </head>
       <body>
         <MarketingNav />
         {children}

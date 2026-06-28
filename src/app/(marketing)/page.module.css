@@ -15,6 +15,9 @@
   background-size: cover;
   background-position: center right;
   opacity: 0.14;
+  will-change: opacity;
+  /* GPU-composited layer — no repaint during scroll */
+  transform: translateZ(0);
 }
 
 .heroContent {
@@ -138,6 +141,8 @@
   aspect-ratio: 16/9;
   object-fit: cover;
   display: block;
+  background: #E2E8F0;
+  /* prevent CLS — space reserved before image loads */
 }
 
 .featureBody { padding: 24px; flex: 1; }
@@ -232,7 +237,7 @@
   box-shadow: 0 12px 40px rgba(15,23,42,0.1);
 }
 
-.rolePhoto { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.rolePhoto { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: #E2E8F0; }
 
 .roleBody { padding: 24px; }
 
@@ -411,6 +416,7 @@
   background-image: url('/assets/NGO COORDINATOR.jpg');
   background-size: cover; background-position: center;
   opacity: 0.08;
+  transform: translateZ(0);
 }
 
 .ctaContent { position: relative; z-index: 2; text-align: center; }

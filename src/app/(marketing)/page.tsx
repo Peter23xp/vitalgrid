@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Package, Bell, ArrowLeftRight, Thermometer, Map, ScrollText } from 'lucide-react';
@@ -90,7 +88,7 @@ export default function LandingPage() {
           <div className={styles.featuresGrid}>
             {FEATURES.map((f, i) => (
               <div key={i} className={styles.featureCard}>
-                <img src={f.photo} alt={f.title} className={styles.featurePhoto} loading="lazy" />
+                <img src={f.photo} alt={f.title} className={styles.featurePhoto} loading="lazy" decoding="async" />
                 <div className={styles.featureBody}>
                   <div className={styles.featureIcon}>{f.icon}</div>
                   <p className={styles.featureTitle}>{f.title}</p>

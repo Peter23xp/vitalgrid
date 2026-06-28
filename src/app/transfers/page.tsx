@@ -21,7 +21,7 @@ interface Transfer {
 }
 
 const STATUS_TAB: Record<string, string[]> = {
-  active: ['in_transit', 'confirmed'],
+  active: ['in_transit', 'confirmed', 'delivered'],
   pending: ['pending'],
   completed: ['completed', 'incident', 'cancelled'],
 };
@@ -37,10 +37,12 @@ export default function TransfersPage() {
       .then((r) => {
         const data = r.data ?? [];
         setTransfers(data);
-        // Auto-select "pending" tab if there are pending transfers and none active
-        const hasPending = data.some((t) => STATUS_TAB.pending.includes(t.status));
-        const hasActive  = data.some((t) => STATUS_TAB.active.includes(t.status));
-        if (hasPending && !hasActive) setTab('pending');
+        const hasDelivered = data.some((t) => t.status === 'delivered');
+        const hasPending   = data.some((t) => STATUS_TAB.pending.includes(t.status));
+        const hasActive    = data.some((t) => STATUS_TAB.active.includes(t.status));
+        // Priorité : delivered > pending > active
+        if (hasDelivered) setTab('active');
+        else if (hasPending && !hasActive) setTab('pending');
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -76,7 +78,16 @@ export default function TransfersPage() {
             className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
             onClick={() => setTab(t)}
           >
-            {t === 'active' ? `En cours (${counts.active})` : t === 'pending' ? (
+            {t === 'active' ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                En cours ({counts.active})
+                {transfers.some((tr) => tr.status === 'delivered') && (
+                  <span style={{ background: 'var(--status-warning)', color: '#fff', borderRadius: 10, fontSize: 10, fontWeight: 700, padding: '1px 6px', lineHeight: '16px' }}>
+                    À réceptionner
+                  </span>
+                )}
+              </span>
+            ) : t === 'pending' ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 En attente
                 {counts.pending > 0 && (

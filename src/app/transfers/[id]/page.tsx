@@ -110,11 +110,19 @@ function TransferActions({ transfer, me, acting, showTransitForm, driverName, dr
     );
   }
 
-  if (transfer.status === 'delivered') return (
-    <Link href={`/transfers/${transferId}/receive`} className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '14px' }}>
-      CONFIRMER LA RÉCEPTION
-    </Link>
-  );
+  if (transfer.status === 'delivered') {
+    // Only the requesting facility (destination) confirms receipt
+    if (!isRequester) return (
+      <p style={{ fontSize: 13, color: 'var(--brand-slate)', padding: '12px 0' }}>
+        Livré — en attente de confirmation de réception par l&apos;établissement destinataire.
+      </p>
+    );
+    return (
+      <Link href={`/transfers/${transferId}/receive`} className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '14px' }}>
+        CONFIRMER LA RÉCEPTION
+      </Link>
+    );
+  }
 
   return null;
 }

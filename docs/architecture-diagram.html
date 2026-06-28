@@ -4,572 +4,167 @@
 <meta charset="UTF-8">
 <title>VitalGrid — Architecture Diagram</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Caveat+Brush&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #fafaf7;
-    font-family: 'Caveat', cursive;
+    background: #ffffff;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 48px 32px;
-  }
-
-  .page {
-    width: 960px;
-    background: #fdfdf9;
-    border: 1.5px solid #d4d0c8;
-    border-radius: 4px;
-    padding: 48px 52px 56px;
-    position: relative;
-    /* Subtle graph paper lines */
-    background-image:
-      linear-gradient(rgba(180,175,165,0.18) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(180,175,165,0.18) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-
-  /* Title */
-  .title {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .title h1 {
-    font-family: 'Caveat Brush', cursive;
-    font-size: 34px;
-    color: #1a1a18;
-    letter-spacing: 0.5px;
-    line-height: 1;
-  }
-  .title h1 span { color: #1a6641; }
-  .title .sub {
-    font-size: 15px;
-    color: #6b6860;
-    margin-top: 6px;
-    font-weight: 400;
-  }
-  .title .underline {
-    width: 120px;
-    height: 3px;
-    background: #1a6641;
-    margin: 10px auto 0;
-    border-radius: 2px;
-    transform: rotate(-0.5deg);
-  }
-
-  /* ─── Boxes ─── */
-  .box {
-    border-radius: 6px;
-    padding: 12px 16px;
-    position: relative;
-    border: 2px solid;
-  }
-
-  .box-label {
-    font-family: 'Caveat Brush', cursive;
-    font-size: 15px;
-    font-weight: 400;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .box-detail {
-    font-size: 13px;
-    color: #4a4844;
-    line-height: 1.5;
-  }
-
-  .box-tag {
-    display: inline-block;
-    font-size: 11px;
-    padding: 1px 8px;
-    border-radius: 20px;
-    margin-top: 5px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
-
-  /* Colors */
-  .c-ink   { border-color: #2a2825; background: #ffffff; }
-  .c-ink   .box-label { color: #1a1a18; }
-  .c-ink   .box-tag   { background: #2a2825; color: #fff; }
-
-  .c-green { border-color: #1a6641; background: #f0f9f4; }
-  .c-green .box-label { color: #1a6641; }
-  .c-green .box-tag   { background: #1a6641; color: #fff; }
-
-  .c-blue  { border-color: #1a4d7a; background: #f0f5fb; }
-  .c-blue  .box-label { color: #1a4d7a; }
-  .c-blue  .box-tag   { background: #1a4d7a; color: #fff; }
-
-  .c-amber { border-color: #8a5a00; background: #fdf8ee; }
-  .c-amber .box-label { color: #8a5a00; }
-  .c-amber .box-tag   { background: #8a5a00; color: #fff; }
-
-  .c-red   { border-color: #8a2020; background: #fdf0f0; }
-  .c-red   .box-label { color: #8a2020; }
-  .c-red   .box-tag   { background: #8a2020; color: #fff; }
-
-  .c-gray  { border-color: #8a8878; background: #f8f8f5; }
-  .c-gray  .box-label { color: #4a4844; }
-  .c-gray  .box-tag   { background: #8a8878; color: #fff; }
-
-  /* ─── Layer band labels ─── */
-  .layer-band {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 18px 0 8px;
-  }
-  .layer-band::before {
-    content: '';
-    width: 18px;
-    height: 2px;
-    background: #b0aa9e;
-    flex-shrink: 0;
-  }
-  .layer-band::after {
-    content: '';
-    flex: 1;
-    height: 1.5px;
-    background: #d4d0c8;
-    border-style: dashed;
-  }
-  .layer-band span {
-    font-size: 13px;
-    color: #9a9488;
-    font-weight: 600;
-    white-space: nowrap;
-    letter-spacing: 0.04em;
-  }
-
-  /* ─── Arrows ─── */
-  .arrow-v {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 2px 0;
-    gap: 0;
-  }
-  .arrow-v .shaft {
-    width: 2px;
-    height: 18px;
-    background: #3a3830;
-    border-radius: 1px;
-  }
-  .arrow-v .head {
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid #3a3830;
-    margin-top: -1px;
-  }
-  .arrow-v .label {
-    font-size: 11px;
-    color: #7a7870;
-    margin-top: 2px;
-  }
-
-  /* ─── Grid rows ─── */
-  .grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-  }
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .grid-5 {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-  }
-
-  /* ─── Connector lines between sections (SVG overlay) ─── */
-  .arrow-center {
-    display: flex;
-    justify-content: center;
-    margin: 4px 0;
-  }
-
-  /* small client boxes */
-  .client-box {
-    border: 2px solid #3a3830;
-    border-radius: 8px;
-    background: #fff;
-    padding: 10px 8px;
-    text-align: center;
-  }
-  .client-box .icon {
-    font-size: 22px;
-    display: block;
-    margin-bottom: 4px;
-    line-height: 1;
-  }
-  .client-box .name {
-    font-family: 'Caveat Brush', cursive;
-    font-size: 14px;
-    color: #1a1a18;
-    display: block;
-    line-height: 1.2;
-  }
-  .client-box .type {
-    font-size: 11px;
-    color: #7a7870;
-    display: block;
-    margin-top: 2px;
-  }
-
-  /* ─── Big DB boxes ─── */
-  .db-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .db-box {
-    border: 2.5px solid;
-    border-radius: 8px;
-    padding: 16px 18px;
-  }
-  .db-box .db-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1.5px dashed;
-  }
-  .db-box .db-icon {
-    font-size: 26px;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .db-box .db-name {
-    font-family: 'Caveat Brush', cursive;
-    font-size: 18px;
-    line-height: 1.1;
-  }
-  .db-box .db-sub {
-    font-size: 12px;
-    color: #6b6860;
-    margin-top: 1px;
-  }
-  .db-box .db-why {
-    font-size: 12.5px;
-    color: #3a3830;
-    line-height: 1.5;
-    margin-bottom: 8px;
-  }
-  .db-box .db-tables {
-    font-size: 11.5px;
-    color: #5a5850;
-    line-height: 1.6;
-  }
-  .db-box .db-tables strong {
-    font-weight: 700;
-    color: #2a2825;
-  }
-
-  .db-dsql { border-color: #1a4d7a; background: #f4f8fd; }
-  .db-dsql .db-header { border-color: #99c0e8; }
-  .db-dsql .db-name { color: #1a4d7a; }
-
-  .db-dynamo { border-color: #8a5a00; background: #fdf8ee; }
-  .db-dynamo .db-header { border-color: #d4a840; }
-  .db-dynamo .db-name { color: #8a5a00; }
-
-  /* ─── Why note callout ─── */
-  .why-note {
-    background: #fffdf0;
-    border: 1.5px solid #d4c870;
-    border-radius: 6px;
-    padding: 6px 10px;
-    margin-top: 8px;
-    font-size: 12px;
-    color: #5a5020;
-    line-height: 1.5;
-  }
-  .why-note::before {
-    content: '★ ';
-    font-size: 11px;
-    color: #b09820;
-  }
-
-  /* ─── External services row ─── */
-  .ext-box {
-    border: 1.5px dashed #8a8878;
-    border-radius: 6px;
-    background: #f8f8f5;
-    padding: 10px 12px;
-    text-align: center;
-  }
-  .ext-box .ext-name {
-    font-family: 'Caveat Brush', cursive;
-    font-size: 14px;
-    color: #3a3830;
-    display: block;
-  }
-  .ext-box .ext-detail {
-    font-size: 11px;
-    color: #7a7870;
-    display: block;
-    margin-top: 2px;
-    line-height: 1.4;
-  }
-
-  /* ─── Footer legend ─── */
-  .legend {
-    margin-top: 28px;
-    padding-top: 16px;
-    border-top: 1.5px dashed #d4d0c8;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .legend-items {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #6b6860;
-  }
-  .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    border: 2px solid;
-    flex-shrink: 0;
-  }
-  .legend-note {
-    font-size: 12px;
-    color: #9a9488;
-  }
-
-  /* Sketchy box shadow effect */
-  .box, .client-box, .db-box, .ext-box {
-    box-shadow: 2px 3px 0 rgba(0,0,0,0.07);
+    padding: 30px;
   }
 </style>
 </head>
 <body>
-<div class="page">
+<svg width="820" height="600" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
 
-  <!-- Title -->
-  <div class="title">
-    <h1><span>VitalGrid</span> — System Architecture</h1>
-    <p class="sub">AWS Databases Hackathon · June 2026 · Medical Supply Chain Platform</p>
-    <div class="underline"></div>
-  </div>
+  <!-- ── Arrowhead markers ── -->
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
+    </marker>
+    <marker id="ah-left" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#9ca3af"/>
+    </marker>
+  </defs>
 
-  <!-- ── 1. CLIENTS ─────────────────────── -->
-  <div class="layer-band"><span>① Clients</span></div>
-  <div class="grid-5">
-    <div class="client-box">
-      <span class="icon">🏥</span>
-      <span class="name">Facility Manager</span>
-      <span class="type">Desktop / Tablet</span>
-    </div>
-    <div class="client-box">
-      <span class="icon">🩺</span>
-      <span class="name">Field Agent</span>
-      <span class="type">Mobile Browser</span>
-    </div>
-    <div class="client-box">
-      <span class="icon">🌍</span>
-      <span class="name">NGO Coordinator</span>
-      <span class="type">Web Browser</span>
-    </div>
-    <div class="client-box">
-      <span class="icon">🌡</span>
-      <span class="name">IoT Sensor</span>
-      <span class="type">Cold-Chain Device</span>
-    </div>
-    <div class="client-box">
-      <span class="icon">🔍</span>
-      <span class="name">Auditor</span>
-      <span class="type">Web Browser</span>
-    </div>
-  </div>
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  TITLE                                         -->
+  <!-- ══════════════════════════════════════════════ -->
+  <text x="410" y="28" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">
+    <tspan fill="#2563eb">VitalGrid</tspan> — Architecture Diagram
+  </text>
+  <text x="410" y="48" text-anchor="middle" font-size="13" fill="#6b7280">
+    AWS Databases Hackathon · Medical Supply Chain · June 2026
+  </text>
 
-  <!-- Arrow -->
-  <div class="arrow-center">
-    <div class="arrow-v">
-      <div class="shaft" style="height:22px;"></div>
-      <div class="head"></div>
-      <div class="label">HTTPS</div>
-    </div>
-  </div>
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  ARROWS  (drawn before boxes so boxes are on top) -->
+  <!-- ══════════════════════════════════════════════ -->
 
-  <!-- ── 2. EDGE / CDN ─────────────────── -->
-  <div class="layer-band"><span>② Edge — Vercel CDN</span></div>
-  <div class="grid-3">
-    <div class="box c-ink">
-      <span class="box-label">Edge Middleware</span>
-      <span class="box-detail">JWT verification on every request · Role-based routing · Redirect by role (super_admin → /dashboard/admin)</span>
-      <span class="box-tag">Next.js Proxy</span>
-    </div>
-    <div class="box c-ink">
-      <span class="box-label">Static Assets</span>
-      <span class="box-detail">75 pages compiled · CSS Modules · Lucide icons · Marketing site (Barlow fonts)</span>
-      <span class="box-tag">CDN Cache</span>
-    </div>
-    <div class="box c-ink">
-      <span class="box-label">App Router</span>
-      <span class="box-detail">Next.js 16.2.7 · Turbopack · Server + Client components · Streaming SSR</span>
-      <span class="box-tag">React 19</span>
-    </div>
-  </div>
+  <!-- Row 1: Users → CDN -->
+  <line x1="152" y1="100" x2="213" y2="100" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
-  <!-- Arrow -->
-  <div class="arrow-center">
-    <div class="arrow-v">
-      <div class="shaft" style="height:22px;"></div>
-      <div class="head"></div>
-    </div>
-  </div>
+  <!-- Row 1: CDN → Load Balancer -->
+  <line x1="367" y1="100" x2="433" y2="100" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
-  <!-- ── 3. APPLICATION LAYER ──────────── -->
-  <div class="layer-band"><span>③ Application — Serverless Functions</span></div>
-  <div class="grid-3">
-    <div class="box c-green">
-      <span class="box-label">REST API — 20 routes</span>
-      <span class="box-detail">/api/transfers · /api/inventory<br>/api/alerts · /api/facilities<br>/api/dashboard · /api/broadcasts</span>
-      <span class="box-tag">Route Handlers</span>
-    </div>
-    <div class="box c-green">
-      <span class="box-label">Auth Service</span>
-      <span class="box-detail">JWT Access (1h) + Refresh (24h) · httpOnly cookies · bcrypt hash · 5-role RBAC</span>
-      <span class="box-tag">jose + bcryptjs</span>
-    </div>
-    <div class="box c-green">
-      <span class="box-label">Business Logic</span>
-      <span class="box-detail">Transfer workflow · Stock reconciliation on receipt · Alert auto-resolution · OCC retry (5×)</span>
-      <span class="box-tag">Repository Layer</span>
-    </div>
-  </div>
+  <!-- Load Balancer ↓ Web/API Servers (vertical — centers aligned at x=545) -->
+  <line x1="545" y1="132" x2="545" y2="180" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
-  <!-- Arrow -->
-  <div class="arrow-center">
-    <div class="arrow-v">
-      <div class="shaft" style="height:22px;"></div>
-      <div class="head"></div>
-    </div>
-  </div>
+  <!-- Auth ↔ Web/API Servers (dashed bidirectional) -->
+  <line x1="187" y1="228" x2="413" y2="228"
+        stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3"
+        marker-end="url(#ah)" marker-start="url(#ah-left)"/>
+  <text x="300" y="220" text-anchor="middle" font-size="10" fill="#9ca3af">token</text>
 
-  <!-- ── 4. DATA LAYER ─────────────────── -->
-  <div class="layer-band"><span>④ Data Layer — AWS Databases</span></div>
-  <div class="db-grid">
+  <!-- Fork from Web/API down to 3 children -->
+  <!-- vertical stem from WebAPI bottom -->
+  <line x1="545" y1="268" x2="545" y2="290" stroke="#9ca3af" stroke-width="1.8"/>
+  <!-- horizontal bar -->
+  <line x1="178" y1="290" x2="710" y2="290" stroke="#9ca3af" stroke-width="1.8"/>
+  <!-- drop to MsgQ -->
+  <line x1="178" y1="290" x2="178" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <!-- drop to DSQL -->
+  <line x1="545" y1="290" x2="545" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
+  <!-- drop to DynamoDB -->
+  <line x1="710" y1="290" x2="710" y2="312" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
-    <!-- Aurora DSQL -->
-    <div class="db-box db-dsql">
-      <div class="db-header">
-        <span class="db-icon">🗄️</span>
-        <div>
-          <div class="db-name">Aurora DSQL</div>
-          <div class="db-sub">PostgreSQL-compatible · Serverless · ACID</div>
-        </div>
-      </div>
-      <p class="db-why">
-        Handles all <strong>transactional data</strong> — organizations, facilities, users, inventory, transfers, alerts, audit logs.
-      </p>
-      <p class="db-tables">
-        <strong>12 tables:</strong> organizations · facilities · users · resources · batches · transfers · alerts · inventory_movements · audit_log · broadcasts · alert_rules · cold_chain_events
-      </p>
-      <div class="why-note">
-        Chosen for multi-tenant ACID transactions — when 2 facilities update the same blood stock concurrently, OCC conflicts are auto-retried. No instances to manage; scales to zero.
-      </div>
-    </div>
+  <!-- MsgQ ↓ Worker -->
+  <line x1="178" y1="398" x2="178" y2="448" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
-    <!-- DynamoDB -->
-    <div class="db-box db-dynamo">
-      <div class="db-header">
-        <span class="db-icon">⚡</span>
-        <div>
-          <div class="db-name">AWS DynamoDB</div>
-          <div class="db-sub">NoSQL · Key-Value · Millisecond latency</div>
-        </div>
-      </div>
-      <p class="db-why">
-        Handles <strong>IoT cold-chain events</strong> — temperature readings from sensors attached to blood transport containers.
-      </p>
-      <p class="db-tables">
-        <strong>Table: cold_chain_events</strong><br>
-        PK: transferId (String)<br>
-        SK: timestamp (ISO 8601)<br>
-        Attrs: celsius · deviceId · isAlert
-      </p>
-      <div class="why-note">
-        Chosen for IoT burst writes — sensors emit readings every 5 min across 100s of active transfers. Relational overhead would be wasteful; DynamoDB absorbs the volume at sub-ms latency.
-      </div>
-    </div>
-  </div>
+  <!-- DSQL --reads--> Worker (dashed) -->
+  <line x1="415" y1="358" x2="272" y2="452"
+        stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+  <text x="332" y="395" text-anchor="middle" font-size="10" fill="#9ca3af">reads</text>
 
-  <!-- Arrow -->
-  <div class="arrow-center">
-    <div class="arrow-v">
-      <div class="shaft" style="height:22px;"></div>
-      <div class="head"></div>
-    </div>
-  </div>
+  <!-- Worker → External Services -->
+  <line x1="270" y1="479" x2="588" y2="479" stroke="#9ca3af" stroke-width="1.8" marker-end="url(#ah)"/>
 
-  <!-- ── 5. EXTERNAL SERVICES ──────────── -->
-  <div class="layer-band"><span>⑤ External Services</span></div>
-  <div class="grid-3">
-    <div class="ext-box">
-      <span class="ext-name">📧 SendGrid</span>
-      <span class="ext-detail">Transactional email · Critical alert notifications · Demo request form</span>
-    </div>
-    <div class="ext-box">
-      <span class="ext-name">🗺 OpenStreetMap + Leaflet</span>
-      <span class="ext-detail">Facility pin maps · Regional stock visualization · No API key needed</span>
-    </div>
-    <div class="ext-box">
-      <span class="ext-name">🔑 AWS DsqlSigner</span>
-      <span class="ext-detail">IAM-based auth tokens for DSQL · Auto-rotated every 15 min · @aws-sdk/dsql-signer</span>
-    </div>
-  </div>
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  ROW 1 BOXES                                   -->
+  <!-- ══════════════════════════════════════════════ -->
 
-  <!-- Legend -->
-  <div class="legend">
-    <div class="legend-items">
-      <div class="legend-item">
-        <div class="legend-dot" style="border-color:#2a2825;background:#fff;"></div>
-        Next.js / Vercel
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="border-color:#1a6641;background:#f0f9f4;"></div>
-        Application Logic
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="border-color:#1a4d7a;background:#f0f5fb;"></div>
-        Aurora DSQL
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="border-color:#8a5a00;background:#fdf8ee;"></div>
-        DynamoDB
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="border-color:#8a8878;background:#f8f8f5;border-style:dashed;"></div>
-        External
-      </div>
-    </div>
-    <div class="legend-note">vitalgrid.vercel.app — Multi-tenant · 5 roles · 54 countries target</div>
-  </div>
+  <!-- Users (gray) — [20, 70, 132, 60] center x=86 -->
+  <rect x="20" y="70" width="132" height="60" rx="10" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="86" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#374151">Users</text>
+  <text x="86" y="112" text-anchor="middle" font-size="11" fill="#6b7280">Web &amp; mobile clients</text>
+  <text x="86" y="125" text-anchor="middle" font-size="11" fill="#6b7280">5 roles</text>
 
-</div>
+  <!-- CDN (sky) — [213, 70, 154, 60] center x=290 -->
+  <rect x="213" y="70" width="154" height="60" rx="10" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="290" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">CDN</text>
+  <text x="290" y="112" text-anchor="middle" font-size="11" fill="#3b82f6">Static assets, caching</text>
+  <text x="290" y="125" text-anchor="middle" font-size="11" fill="#3b82f6">Vercel Edge</text>
+
+  <!-- Load Balancer (sky) — [433, 70, 224, 60] center x=545 -->
+  <rect x="433" y="70" width="224" height="60" rx="10" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="545" y="93" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">Load Balancer / API Gateway</text>
+  <text x="545" y="110" text-anchor="middle" font-size="11" fill="#3b82f6">Routing, TLS, rate limits</text>
+  <text x="545" y="123" text-anchor="middle" font-size="11" fill="#3b82f6">Next.js Middleware · RBAC</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  ROW 2 BOXES                                   -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- Auth Service (pink) — [20, 180, 167, 88] center x=103 -->
+  <rect x="20" y="180" width="167" height="88" rx="10" fill="#fce7f3" stroke="#fbcfe8" stroke-width="1.5"/>
+  <text x="103" y="204" text-anchor="middle" font-size="14" font-weight="700" fill="#9d174d">Auth Service</text>
+  <text x="103" y="222" text-anchor="middle" font-size="11" fill="#db2777">Sign-in, tokens</text>
+  <text x="103" y="237" text-anchor="middle" font-size="11" fill="#db2777">JWT · bcrypt · 5-role RBAC</text>
+  <text x="103" y="252" text-anchor="middle" font-size="11" fill="#db2777">httpOnly cookies</text>
+
+  <!-- Web / API Servers (purple) — [413, 180, 264, 88] center x=545 -->
+  <rect x="413" y="180" width="264" height="88" rx="10" fill="#ede9fe" stroke="#ddd6fe" stroke-width="1.5"/>
+  <text x="545" y="204" text-anchor="middle" font-size="14" font-weight="700" fill="#5b21b6">Web / API Servers</text>
+  <text x="545" y="222" text-anchor="middle" font-size="11" fill="#7c3aed">Application logic</text>
+  <text x="545" y="237" text-anchor="middle" font-size="11" fill="#7c3aed">Next.js 16 · 20 API routes</text>
+  <text x="545" y="252" text-anchor="middle" font-size="11" fill="#7c3aed">OCC retry · Repository layer</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  ROW 3 BOXES                                   -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- Message Queue (orange) — [88, 312, 180, 86] center x=178 -->
+  <rect x="88" y="312" width="180" height="86" rx="10" fill="#ffedd5" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="178" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#9a3412">Message Queue</text>
+  <text x="178" y="355" text-anchor="middle" font-size="11" fill="#ea580c">Async jobs</text>
+  <text x="178" y="370" text-anchor="middle" font-size="11" fill="#ea580c">Alert notifications</text>
+  <text x="178" y="385" text-anchor="middle" font-size="11" fill="#ea580c">Email triggers</text>
+
+  <!-- Aurora DSQL (sky) — [415, 312, 260, 86] center x=545 -->
+  <rect x="415" y="312" width="260" height="86" rx="10" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="545" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">Aurora DSQL</text>
+  <text x="545" y="355" text-anchor="middle" font-size="11" fill="#3b82f6">Primary data store</text>
+  <text x="545" y="370" text-anchor="middle" font-size="11" fill="#3b82f6">12 tables · ACID · Multi-tenant</text>
+  <text x="545" y="385" text-anchor="middle" font-size="11" fill="#3b82f6">PostgreSQL-compatible · Serverless</text>
+
+  <!-- DynamoDB (yellow) — [630, 312, 160, 86] center x=710 -->
+  <rect x="630" y="312" width="160" height="86" rx="10" fill="#fef9c3" stroke="#fde68a" stroke-width="1.5"/>
+  <text x="710" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#713f12">DynamoDB</text>
+  <text x="710" y="355" text-anchor="middle" font-size="11" fill="#a16207">IoT cold-chain events</text>
+  <text x="710" y="370" text-anchor="middle" font-size="11" fill="#a16207">PK: transferId</text>
+  <text x="710" y="385" text-anchor="middle" font-size="11" fill="#a16207">SK: timestamp · °C</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  ROW 4 BOXES                                   -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- Worker Service (green) — [88, 448, 182, 62] center x=179 -->
+  <rect x="88" y="448" width="182" height="62" rx="10" fill="#d1fae5" stroke="#a7f3d0" stroke-width="1.5"/>
+  <text x="179" y="474" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Worker Service</text>
+  <text x="179" y="492" text-anchor="middle" font-size="11" fill="#059669">Background processing</text>
+
+  <!-- External Services (pink) — [588, 448, 202, 62] center x=689 -->
+  <rect x="588" y="448" width="202" height="62" rx="10" fill="#fce7f3" stroke="#fbcfe8" stroke-width="1.5"/>
+  <text x="689" y="468" text-anchor="middle" font-size="14" font-weight="700" fill="#9d174d">External Services</text>
+  <text x="689" y="485" text-anchor="middle" font-size="11" fill="#db2777">SendGrid · Email API</text>
+  <text x="689" y="500" text-anchor="middle" font-size="11" fill="#db2777">OpenStreetMap · Leaflet</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--  OBSERVABILITY BAR                             -->
+  <!-- ══════════════════════════════════════════════ -->
+  <rect x="20" y="538" width="780" height="50" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="410" y="559" text-anchor="middle" font-size="14" font-weight="700" fill="#374151">Observability</text>
+  <text x="410" y="577" text-anchor="middle" font-size="11" fill="#6b7280">Vercel logs · Aurora DSQL audit_log table · JWT session traces · DynamoDB cold-chain alerts across all services</text>
+
+</svg>
 </body>
 </html>

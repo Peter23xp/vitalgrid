@@ -17,8 +17,9 @@ export async function GET(req: NextRequest) {
     return apiOk(result);
   } catch (e: unknown) {
     const err = e as Error;
-    if (err.message === 'ERR_UNAUTHENTICATED') return apiError('x-tenant-id header requis', 401);
-    return apiError('Erreur serveur', 500);
+    if (err.message === 'ERR_UNAUTHENTICATED') return apiError('Non authentifié', 401);
+    console.error('[api/alerts GET]', err.message, err);
+    return apiError(err.message || 'Erreur serveur', 500);
   }
 }
 

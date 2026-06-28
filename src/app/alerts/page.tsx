@@ -21,13 +21,15 @@ interface Alert {
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [tab, setTab] = useState<'all' | 'critical' | 'warning'>('all');
 
   const load = () => {
     setLoading(true);
-    apiFetch<{ data: Alert[]; unreadCount: number }>('/api/alerts?limit=50')
-      .then((r) => setAlerts(r.data))
-      .catch(console.error)
+    setError('');
+    apiFetch<{ data: Alert[]; unreadCount: number }>('/api/alerts?limit=200')
+      .then((r) => setAlerts(r.data ?? []))
+      .catch((e) => { console.error(e); setError(e.message ?? 'Erreur de chargement'); })
       .finally(() => setLoading(false));
   };
 
@@ -74,6 +76,12 @@ export default function AlertsPage() {
           </button>
         ))}
       </div>
+
+      {error && (
+        <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid var(--status-error)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, color: 'var(--status-error)', fontSize: 13 }}>
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '48px', color: 'var(--brand-slate)', fontSize: 13 }}>Chargement...</div>

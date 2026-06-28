@@ -14,8 +14,9 @@ export async function listAlerts(
   if (opts.severity) { conditions.push(`severity = $${i++}`); params.push(opts.severity); }
 
   const where = conditions.join(' AND ');
+  params.push(opts.limit ?? 200);
   const data = await query<Alert>(
-    `SELECT * FROM alerts WHERE ${where} ORDER BY created_at DESC LIMIT ${opts.limit ?? 50}`,
+    `SELECT * FROM alerts WHERE ${where} ORDER BY created_at DESC LIMIT $${i}`,
     params
   );
 

@@ -12,6 +12,98 @@ interface Transfer {
   requesting_facility_id: string; source_facility_id: string | null;
   driver_name: string | null; driver_phone: string | null;
   vehicle_ref: string | null; created_at: string; updated_at: string;
+  _viewer_facility_id?: string | null;
+}
+
+function TransferActions({ transfer, acting, showTransitForm, driverName, driverPhone, vehicleRef,
+  onSetShowTransitForm, onSetDriverName, onSetDriverPhone, onSetVehicleRef, onAct, transferId }: {
+  transfer: Transfer; acting: boolean; showTransitForm: boolean;
+  driverName: string; driverPhone: string; vehicleRef: string;
+  onSetShowTransitForm: (v: boolean) => void;
+  onSetDriverName: (v: string) => void;
+  onSetDriverPhone: (v: string) => void;
+  onSetVehicleRef: (v: string) => void;
+  onAct: (status: string, extra?: Record<string, string>) => void;
+  transferId: string;
+}) {
+  const viewerFac   = transfer._viewer_facility_id ?? null;
+  const isSource    = !viewerFac || viewerFac === transfer.source_facility_id;
+  const isRequester = !viewerFac || viewerFac === transfer.requesting_facility_id;
+
+  if (transfer.status === 'pending') return (
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      {isSource && (
+        <button className="btn-primary" style={{ flex: 1 }} disabled={acting} onClick={() => onAct('confirmed')}>
+          <Check size={14} style={{ marginRight: 6 }} />
+          {acting ? 'En cours...' : 'APPROUVER'}
+        </button>
+      )}
+      {isRequester && (
+        <button className="btn-outline" style={{ flex: 1, color: 'var(--status-error)', borderColor: 'var(--status-error)' }} disabled={acting} onClick={() => onAct('cancelled')}>
+          <XCircle size={14} style={{ marginRight: 6 }} />
+          ANNULER MA DEMANDE
+        </button>
+      )}
+      {!isSource && !isRequester && (
+        <p style={{ fontSize: 13, color: 'var(--brand-slate)', padding: '12px 0' }}>
+          En attente d&apos;approbation par l&apos;établissement source.
+        </p>
+      )}
+    </div>
+  );
+
+  if (transfer.status === 'confirmed') {
+    if (!isSource) return (
+      <p style={{ fontSize: 13, color: 'var(--brand-slate)', padding: '12px 0' }}>
+        Transfert approuvé — en attente d&apos;expédition par l&apos;établissement source.
+      </p>
+    );
+    return !showTransitForm ? (
+      <button className="btn-primary" style={{ width: '100%', padding: '14px' }} onClick={() => onSetShowTransitForm(true)}>
+        <Truck size={14} style={{ marginRight: 6 }} />
+        MARQUER EN TRANSIT
+      </button>
+    ) : (
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 10, padding: 16 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Informations transport</p>
+        <div style={{ display: 'grid', gap: 10, marginBottom: 12 }}>
+          <input className="input-field" placeholder="Nom du chauffeur" value={driverName} onChange={(e) => onSetDriverName(e.target.value)} />
+          <input className="input-field" placeholder="Téléphone" value={driverPhone} onChange={(e) => onSetDriverPhone(e.target.value)} />
+          <input className="input-field" placeholder="Réf. véhicule (ex: KIN-4521-A)" value={vehicleRef} onChange={(e) => onSetVehicleRef(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn-primary" style={{ flex: 1 }} disabled={acting}
+            onClick={() => onAct('in_transit', { driver_name: driverName, driver_phone: driverPhone, vehicle_ref: vehicleRef })}>
+            <Truck size={14} style={{ marginRight: 6 }} />
+            {acting ? 'En cours...' : 'CONFIRMER DÉPART'}
+          </button>
+          <button className="btn-outline" onClick={() => onSetShowTransitForm(false)}>Annuler</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (transfer.status === 'in_transit') {
+    if (!isSource) return (
+      <p style={{ fontSize: 13, color: 'var(--brand-slate)', padding: '12px 0' }}>
+        Transfert en transit — en attente de livraison.
+      </p>
+    );
+    return (
+      <button className="btn-primary" style={{ width: '100%', padding: '14px' }} disabled={acting} onClick={() => onAct('delivered')}>
+        <PackageCheck size={14} style={{ marginRight: 6 }} />
+        {acting ? 'En cours...' : 'MARQUER LIVRÉ'}
+      </button>
+    );
+  }
+
+  if (transfer.status === 'delivered') return (
+    <Link href={`/transfers/${transferId}/receive`} className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '14px' }}>
+      CONFIRMER LA RÉCEPTION
+    </Link>
+  );
+
+  return null;
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -129,59 +221,20 @@ export default function TransferDetailPage({ params }: { params: Promise<{ id: s
             </div>
           )}
 
-          {transfer.status === 'pending' && (
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <button className="btn-primary" style={{ flex: 1 }} disabled={acting} onClick={() => act('confirmed')}>
-                <Check size={14} style={{ marginRight: 6 }} />
-                {acting ? 'En cours...' : 'APPROUVER'}
-              </button>
-              <button className="btn-outline" style={{ flex: 1, color: 'var(--status-error)', borderColor: 'var(--status-error)' }} disabled={acting} onClick={() => act('cancelled')}>
-                <XCircle size={14} style={{ marginRight: 6 }} />
-                REFUSER
-              </button>
-            </div>
-          )}
-
-          {transfer.status === 'confirmed' && (
-            <>
-              {!showTransitForm ? (
-                <button className="btn-primary" style={{ width: '100%', padding: '14px' }} onClick={() => setShowTransitForm(true)}>
-                  <Truck size={14} style={{ marginRight: 6 }} />
-                  MARQUER EN TRANSIT
-                </button>
-              ) : (
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 10, padding: 16, marginBottom: 8 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Informations transport</p>
-                  <div style={{ display: 'grid', gap: 10, marginBottom: 12 }}>
-                    <input className="input-field" placeholder="Nom du chauffeur" value={driverName} onChange={(e) => setDriverName(e.target.value)} />
-                    <input className="input-field" placeholder="Téléphone" value={driverPhone} onChange={(e) => setDriverPhone(e.target.value)} />
-                    <input className="input-field" placeholder="Réf. véhicule (ex: KIN-4521-A)" value={vehicleRef} onChange={(e) => setVehicleRef(e.target.value)} />
-                  </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button className="btn-primary" style={{ flex: 1 }} disabled={acting}
-                      onClick={() => act('in_transit', { driver_name: driverName, driver_phone: driverPhone, vehicle_ref: vehicleRef })}>
-                      <Truck size={14} style={{ marginRight: 6 }} />
-                      {acting ? 'En cours...' : 'CONFIRMER DÉPART'}
-                    </button>
-                    <button className="btn-outline" onClick={() => setShowTransitForm(false)}>Annuler</button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {transfer.status === 'in_transit' && (
-            <button className="btn-primary" style={{ width: '100%', padding: '14px' }} disabled={acting} onClick={() => act('delivered')}>
-              <PackageCheck size={14} style={{ marginRight: 6 }} />
-              {acting ? 'En cours...' : 'MARQUER LIVRÉ'}
-            </button>
-          )}
-
-          {transfer.status === 'delivered' && (
-            <Link href={`/transfers/${id}/receive`} className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '14px' }}>
-              CONFIRMER LA RÉCEPTION
-            </Link>
-          )}
+          <TransferActions
+            transfer={transfer}
+            acting={acting}
+            showTransitForm={showTransitForm}
+            driverName={driverName}
+            driverPhone={driverPhone}
+            vehicleRef={vehicleRef}
+            onSetShowTransitForm={setShowTransitForm}
+            onSetDriverName={setDriverName}
+            onSetDriverPhone={setDriverPhone}
+            onSetVehicleRef={setVehicleRef}
+            onAct={act}
+            transferId={id}
+          />
         </div>
       )}
     </div>
